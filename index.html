@@ -9,39 +9,32 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --metal-dark: #121212;
-    --metal-mid: #222222;
-    --metal-light: #333333;
-    --bezel-silver: #888888;
-    --bezel-dark: #555555;
-    --glass: rgba(15, 20, 18, 0.9);
+    --metal-dark: #0a0a0a;
+    --metal-mid: #151515;
+    --metal-light: #2a2a2a;
     
-    /* Vintage Cockpit Colors */
-    --lime: #7acc50;      
-    --amber: #d99c3b;     
-    --red: #cc4444;       
-    --cyan: #4da6b3;      
-    --white: #d1d8d6;     
-    --warning-yellow: #d4b859;
-    --text-dim: #6b7a73;
+    /* Muted Vintage Colors */
+    --phosphor: #5c8f48;      /* Dimmed green */
+    --amber: #a87a32;         /* Rusty amber */
+    --redline: #8a2a2a;       /* Dark red */
+    --teal: #3b7a7a;          /* Muted teal */
+    --white: #a8b0ab;         /* Weathered white */
+    --stencil: #b39e5c;       /* Faded yellow for labels */
     
-    /* Darkened Horizon Colors */
-    --horizon-top: #4a3317;    
-    --horizon-bottom: #1c383d; 
+    --horizon-top: #3a2813;    
+    --horizon-bottom: #172a2a; 
     
-    /* LED Screen Colors */
-    --led-bg: #0a0f0c;
+    --led-bg: #080c0a;
     --led-green: #4af04a;
   }
 
   body {
-    background-color: #151515;
+    background-color: #111;
     background-image: 
-      radial-gradient(circle at 50% 50%, rgba(40,40,40,0.6) 0%, rgba(0,0,0,1) 100%),
-      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px),
-      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.05"/></svg>');
+      radial-gradient(circle at 50% 50%, rgba(30,30,30,0.8) 0%, rgba(0,0,0,1) 100%),
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);
     margin: 0; min-height: 100vh;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
     color: var(--white);
     -webkit-font-smoothing: antialiased;
     padding: 4px;
@@ -62,63 +55,86 @@
   /* YELLOW WARNING BRACKETS */
   .warning-bracket {
     position: absolute;
-    border: 1.5px solid var(--warning-yellow);
-    border-radius: 4px;
+    border: 1.5px solid var(--stencil);
+    border-radius: 2px;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.5;
     z-index: 1;
   }
   .bracket-1 { top: 35%; left: 2%; width: 48%; height: 28%; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
   .bracket-2 { top: 35%; right: 2%; width: 48%; height: 28%; border-left: none; border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
-  /* PANEL BASE */
+  /* PANEL BASE (Machined Metal) */
   .panel {
-    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
-    border: 1px solid var(--bezel-dark);
-    border-radius: 4px;
+    background: 
+      linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%),
+      radial-gradient(circle at 50% 50%, var(--metal-mid) 0%, var(--metal-dark) 100%);
+    border: 1px solid #000;
+    border-radius: 3px;
     padding: 6px;
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.8);
+    box-shadow: 
+      inset 0 1px 1px rgba(255,255,255,0.1), 
+      inset 0 -1px 2px rgba(0,0,0,0.8),
+      0 4px 8px rgba(0,0,0,0.9);
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   
-  /* Screws */
+  /* Physical Screws */
   .panel::before, .panel::after {
-    content: ''; position: absolute; width: 4px; height: 4px;
-    background: radial-gradient(circle at 30% 30%, #888, #222);
-    border-radius: 50%; box-shadow: 0 1px 1px #000;
+    content: ''; position: absolute; width: 5px; height: 5px;
+    background: radial-gradient(circle at 30% 30%, #777, #111);
+    border-radius: 50%; box-shadow: 0 1px 2px #000, inset 0 0 2px #000;
+    z-index: 10;
   }
-  .panel::before { top: 2px; left: 2px; }
-  .panel::after { bottom: 2px; right: 2px; }
+  .panel::before { top: 3px; left: 3px; }
+  .panel::after { bottom: 3px; right: 3px; }
 
+  /* STENCIL LABELS */
   .panel-label {
-    font-size: 7px; font-weight: bold; color: var(--warning-yellow);
+    font-size: 7px; font-weight: 900; color: var(--stencil);
     letter-spacing: 1px; text-transform: uppercase;
-    background: #000; padding: 1px 4px; align-self: flex-start;
-    border-radius: 2px; border: 1px solid #333;
+    background: #050505; padding: 2px 4px; align-self: flex-start;
+    border-radius: 1px; 
+    border: 1px solid #222;
+    box-shadow: inset 0 0 4px #000;
+    text-shadow: 0 1px 1px #000;
   }
 
-  /* MAIN ANALOG GAUGE */
+  /* MAIN ANALOG GAUGE (Machined Bezel) */
   .gauge-container {
     position: relative; width: 100%; aspect-ratio: 1;
     margin-bottom: 4px;
   }
   .gauge-bezel {
     position: absolute; inset: 0; border-radius: 50%;
-    background: linear-gradient(135deg, #444, #111);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2);
+    /* Brushed metal effect */
+    background: 
+      radial-gradient(circle at 30% 30%, #555 0%, #222 40%, #111 100%),
+      repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 2px, rgba(0,0,0,0.1) 3px, transparent 4px);
+    box-shadow: 
+      0 6px 12px rgba(0,0,0,0.9), 
+      inset 0 3px 6px rgba(255,255,255,0.2),
+      inset 0 -3px 6px rgba(0,0,0,0.8);
     display: flex; justify-content: center; align-items: center;
   }
   .gauge-face {
-    position: relative; width: 88%; height: 88%; border-radius: 50%;
-    background: radial-gradient(circle at 50% 50%, #111 0%, #000 80%);
-    box-shadow: inset 0 0 15px rgba(0,0,0,1);
-    border: 1px solid #000;
+    position: relative; width: 86%; height: 86%; border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #000 80%);
+    box-shadow: inset 0 0 20px rgba(0,0,0,1);
+    border: 2px solid #111;
     overflow: hidden;
   }
   
+  /* INSTRUMENT MARKINGS (Crosshairs) */
+  .gauge-face::after {
+    content: ''; position: absolute; inset: 10%;
+    border: 1px dashed rgba(255,255,255,0.05); border-radius: 50%;
+    pointer-events: none;
+  }
+
   /* SCALES & TICKS */
   .gauge-ticks { position: absolute; inset: 0; border-radius: 50%; z-index: 2;}
   
@@ -126,22 +142,25 @@
     position: absolute; top: 0; left: 50%; width: 1px; height: 3px;
     background: var(--white); 
     transform-origin: 50% 50%; 
-    opacity: 0.4;
+    opacity: 0.3;
   }
   
   .tick.major { 
-    height: 7px; width: 2px; 
+    height: 6px; width: 1.5px; 
     background: var(--white); 
-    opacity: 1; 
-    margin-left: -0.5px;
+    opacity: 0.8; 
+    margin-left: -0.25px;
   }
+
+  /* Redline tick (Speedometer style) */
+  .tick.redline { background: var(--redline) !important; opacity: 0.9 !important; }
 
   .tick-label {
     position: absolute; top: 0; left: 50%;
-    color: var(--white); font-size: 7px; font-weight: bold;
-    font-family: Arial, sans-serif;
+    color: var(--white); font-size: 6px; font-weight: bold;
+    font-family: 'Courier New', monospace;
     transform-origin: 50% 50%;
-    opacity: 0.9;
+    opacity: 0.7;
     pointer-events: none;
     z-index: 2;
     text-shadow: 0 0 2px #000;
@@ -149,37 +168,38 @@
 
   /* Needle */
   .needle {
-    position: absolute; bottom: 50%; left: 50%; width: 3px; height: 35px;
+    position: absolute; bottom: 50%; left: 50%; width: 2px; height: 35px;
     transform-origin: bottom center; transform: rotate(-135deg);
-    margin-left: -1.5px; z-index: 3;
+    margin-left: -1px; z-index: 3;
     box-shadow: 0 1px 3px rgba(0,0,0,0.8);
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .needle.pv { background: linear-gradient(to top, var(--amber) 0%, var(--amber) 80%, #fff 100%); }
+  .needle.pv { background: linear-gradient(to top, var(--amber) 0%, var(--amber) 70%, #fff 100%); }
   
   .needle-pivot {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 8px; height: 8px; background: radial-gradient(circle, #999, #333);
+    width: 8px; height: 8px; background: radial-gradient(circle, #666, #111);
     border-radius: 50%; z-index: 4; border: 1px solid #000;
+    box-shadow: 0 1px 2px #000;
   }
 
   /* DIGITAL READOUT */
   .gauge-digital {
-    position: absolute; bottom: 12%; width: 100%; text-align: center;
-    z-index: 2; background: rgba(0,0,0,0.85); padding: 2px 0;
-    border-top: 1px solid #333; border-bottom: 1px solid #333;
+    position: absolute; bottom: 10%; width: 100%; text-align: center;
+    z-index: 2; background: rgba(0,0,0,0.9); padding: 2px 0;
+    border-top: 1px solid #222; border-bottom: 1px solid #222;
   }
   .gauge-digital .num { 
     font-family: 'Courier New', monospace; 
-    font-size: 28px; 
+    font-size: 26px; 
     font-weight: 900; 
-    color: var(--lime); 
-    text-shadow: 0 0 8px rgba(122,204,80,0.8); 
+    color: var(--phosphor); 
+    text-shadow: 0 0 6px rgba(92,143,72,0.6); 
     line-height: 1.1;
   }
   .gauge-digital .lbl { 
     font-size: 6px; 
-    color: var(--warning-yellow); 
+    color: var(--stencil); 
     letter-spacing: 1px; 
     font-weight: bold;
   }
@@ -192,20 +212,20 @@
   .mini-gauge {
     position: relative; width: 100%; aspect-ratio: 1;
     border-radius: 50%;
-    background: linear-gradient(135deg, #333, #111);
+    background: radial-gradient(circle at 30% 30%, #444 0%, #111 100%);
     box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8);
     display: flex; justify-content: center; align-items: center;
   }
   .mini-gauge-face {
-    position: relative; width: 82%; height: 82%; border-radius: 50%;
+    position: relative; width: 84%; height: 84%; border-radius: 50%;
     background: #050505; border: 1px solid #000;
     overflow: hidden;
   }
   .mini-gauge .needle { height: 18px; }
   
   .mini-gauge .gauge-digital { bottom: 6%; padding: 1px 0; }
-  .mini-gauge .gauge-digital .num { font-size: 18px; font-weight: 900; }
-  .mini-gauge .gauge-digital .lbl { font-size: 5px; font-weight: bold; }
+  .mini-gauge .gauge-digital .num { font-size: 16px; }
+  .mini-gauge .gauge-digital .lbl { font-size: 5px; }
 
   /* Smaller labels for mini gauges */
   .mini-gauge .tick-label { font-size: 5px; }
@@ -218,13 +238,13 @@
   .horizon-gauge {
     position: relative; width: 100%; aspect-ratio: 1;
     border-radius: 50%;
-    background: linear-gradient(135deg, #333, #111);
+    background: radial-gradient(circle at 30% 30%, #444 0%, #111 100%);
     box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8);
     display: flex; justify-content: center; align-items: center;
     overflow: hidden;
   }
   .horizon-face {
-    position: relative; width: 82%; height: 82%; border-radius: 50%;
+    position: relative; width: 84%; height: 84%; border-radius: 50%;
     background: #000; border: 1px solid #000;
     overflow: hidden;
   }
@@ -240,7 +260,7 @@
   }
   
   .horizon-line {
-    position: absolute; width: 100%; height: 2px; background: #000;
+    position: absolute; width: 100%; height: 1px; background: #000;
     top: 50%; transform: translateY(-50%); z-index: 2;
     box-shadow: 0 0 4px rgba(0,0,0,0.8);
   }
@@ -249,27 +269,27 @@
     position: absolute; inset: 0; z-index: 3; pointer-events: none;
   }
   .horizon-reticle::before {
-    content: ''; position: absolute; top: 50%; left: 10%; width: 30%; height: 2px; background: var(--white); transform: translateY(-50%); box-shadow: 0 0 4px #000; opacity: 0.7;
+    content: ''; position: absolute; top: 50%; left: 10%; width: 25%; height: 1.5px; background: var(--white); transform: translateY(-50%); opacity: 0.5;
   }
   .horizon-reticle::after {
-    content: ''; position: absolute; top: 50%; right: 10%; width: 30%; height: 2px; background: var(--white); transform: translateY(-50%); box-shadow: 0 0 4px #000; opacity: 0.7;
+    content: ''; position: absolute; top: 50%; right: 10%; width: 25%; height: 1.5px; background: var(--white); transform: translateY(-50%); opacity: 0.5;
   }
 
   .horizon-glass {
     position: absolute; inset: 0; z-index: 4; pointer-events: none;
-    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(0,0,0,0.7) 100%);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
     border-radius: 50%;
   }
 
   /* LED DOT MATRIX SCREEN */
   .led-screen-panel {
     grid-column: 1 / -1;
-    background: #000;
-    border: 2px inset #333;
-    border-radius: 4px;
+    background: var(--led-bg);
+    border: 2px inset #222;
+    border-radius: 3px;
     padding: 6px;
-    box-shadow: inset 0 0 15px #000;
+    box-shadow: inset 0 0 20px #000;
     display: flex; gap: 10px;
   }
   .led-column { flex: 1; }
@@ -279,16 +299,16 @@
     color: var(--led-green); text-shadow: 0 0 4px var(--led-green);
     margin-bottom: 2px; letter-spacing: 1px; font-weight: bold;
   }
-  .led-row span:first-child { color: var(--text-dim); text-shadow: none; font-size: 7px; }
+  .led-row span:first-child { color: var(--stencil); text-shadow: none; font-size: 7px; }
 
   /* OSCILLOSCOPE CHART */
   .chart-panel {
     grid-column: 1 / -1;
     height: 90px;
-    background: #080c0a;
-    border: 2px solid #2a2a2a;
-    border-radius: 4px;
-    box-shadow: inset 0 0 30px #000, inset 0 0 10px rgba(122,204,80,0.05), 0 4px 8px rgba(0,0,0,0.8);
+    background: #050806;
+    border: 2px inset #1a1a1a;
+    border-radius: 3px;
+    box-shadow: inset 0 0 30px #000;
     position: relative;
     overflow: hidden;
     margin-top: 2px;
@@ -296,13 +316,13 @@
   .chart-panel::before {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
     background-image: 
-      linear-gradient(rgba(122,204,80,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(122,204,80,0.05) 1px, transparent 1px);
+      linear-gradient(rgba(92,143,72,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(92,143,72,0.05) 1px, transparent 1px);
     background-size: 15px 15px;
   }
   .chart-panel::after {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
-    background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);
+    background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.4) 2px, rgba(0,0,0,0.4) 4px);
   }
   .chart-canvas { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; }
 
@@ -310,7 +330,7 @@
   
   @keyframes flicker {
     0% { opacity: 1; }
-    5% { opacity: 0.8; }
+    5% { opacity: 0.7; }
     10% { opacity: 1; }
     100% { opacity: 1; }
   }
@@ -543,34 +563,32 @@ function buildScale(containerId, majorCount, maxVal, radius, isMini = false) {
   if(!container) return;
   container.innerHTML = ''; 
   
-  // Increased density: 10 minor ticks per major tick for speedometer look
   const minorPerMajor = 10; 
   const totalTicks = majorCount * minorPerMajor; 
   
   for (let i = 0; i <= totalTicks; i++) {
     const isMajor = i % minorPerMajor === 0;
+    
     const tick = document.createElement('div');
-    tick.className = 'tick' + (isMajor ? ' major' : '');
+    let tickClass = 'tick' + (isMajor ? ' major' : '');
     
-    // Calculate angle (-135 to 135)
+    // Add redline to the last 20% of the gauge (Speedometer style)
+    if (i / totalTicks > 0.8) {
+      tickClass += ' redline';
+    }
+    
+    tick.className = tickClass;
     const angle = -135 + (270 * (i / totalTicks));
-    
-    // Position tick
     tick.style.transform = `rotate(${angle}deg) translateY(-${radius}px)`;
     container.appendChild(tick);
 
-    // Add labels on major ticks
     if (isMajor) {
       const labelVal = (maxVal / majorCount) * (i / minorPerMajor);
-      if (labelVal !== 0 && labelVal !== maxVal) { // Skip 0 and max to save space
+      if (labelVal !== 0 && labelVal !== maxVal) { 
         const lbl = document.createElement('div');
         lbl.className = 'tick-label';
         lbl.textContent = Math.round(labelVal);
-        
-        // Push label slightly further out than the tick
         const labelRadius = radius + (isMini ? 6 : 9);
-        
-        // We need to position the label, then counter-rotate it so the text stays upright
         lbl.style.transform = `rotate(${angle}deg) translateY(-${labelRadius}px) rotate(${-angle}deg)`;
         container.appendChild(lbl);
       }
@@ -579,7 +597,6 @@ function buildScale(containerId, majorCount, maxVal, radius, isMini = false) {
 }
 
 // Build Graduated Scales
-// Parameters: (ID, Number of major sections, Max Value, Radius in px, isMini)
 buildScale('ticksPv', 4, 2000, 50);
 buildScale('ticksBatt', 4, 60, 50);
 buildScale('ticksInv', 4, 2000, 50);
@@ -656,9 +673,9 @@ function drawCombinedChart() {
   ctx.clearRect(0, 0, w, h);
 
   const series = [
-    { key: 'pv',   color: '#7acc50', fill: 'rgba(122,204,80,0.05)' },   
-    { key: 'grid', color: '#cc4444', fill: 'rgba(204,68,68,0.05)' },    
-    { key: 'inv',  color: '#d99c3b', fill: 'rgba(217,156,59,0.05)' }    
+    { key: 'pv',   color: '#5c8f48', fill: 'rgba(92,143,72,0.05)' },   
+    { key: 'grid', color: '#8a2a2a', fill: 'rgba(138,42,42,0.05)' },    
+    { key: 'inv',  color: '#a87a32', fill: 'rgba(168,122,50,0.05)' }    
   ];
 
   const max = 2000;
@@ -693,19 +710,19 @@ function drawCombinedChart() {
     ctx.lineCap = 'round';
     
     ctx.shadowColor = s.color;
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 4;
     ctx.stroke();
     ctx.shadowBlur = 0;
 
     const last = pts[pts.length - 1];
     ctx.beginPath();
-    ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2);
+    ctx.arc(last.x, last.y, 2, 0, Math.PI * 2);
     ctx.fillStyle = s.color;
     ctx.fill();
   });
 
   if (!hasData) {
-    ctx.fillStyle = 'rgba(122,204,80,0.5)';
+    ctx.fillStyle = 'rgba(92,143,72,0.5)';
     ctx.font = '10px "Courier New", monospace';
     ctx.fillText('NO SIGNAL...', 10, h / 2 + 3);
   }
