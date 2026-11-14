@@ -123,14 +123,14 @@
   .gauge-ticks { position: absolute; inset: 0; border-radius: 50%; z-index: 2;}
   
   .tick {
-    position: absolute; top: 0; left: 50%; width: 1px; height: 4px;
+    position: absolute; top: 0; left: 50%; width: 1px; height: 3px;
     background: var(--white); 
-    transform-origin: 50% 50%; /* Will be overridden by JS */
-    opacity: 0.5;
+    transform-origin: 50% 50%; 
+    opacity: 0.4;
   }
   
   .tick.major { 
-    height: 8px; width: 2px; 
+    height: 7px; width: 2px; 
     background: var(--white); 
     opacity: 1; 
     margin-left: -0.5px;
@@ -141,9 +141,10 @@
     color: var(--white); font-size: 7px; font-weight: bold;
     font-family: Arial, sans-serif;
     transform-origin: 50% 50%;
-    opacity: 0.8;
+    opacity: 0.9;
     pointer-events: none;
     z-index: 2;
+    text-shadow: 0 0 2px #000;
   }
 
   /* Needle */
@@ -208,8 +209,8 @@
 
   /* Smaller labels for mini gauges */
   .mini-gauge .tick-label { font-size: 5px; }
-  .mini-gauge .tick { height: 3px; }
-  .mini-gauge .tick.major { height: 5px; }
+  .mini-gauge .tick { height: 2px; }
+  .mini-gauge .tick.major { height: 4px; }
 
   /* =========================================
      HORIZON GAUGE (ATTITUDE INDICATOR)
@@ -542,10 +543,12 @@ function buildScale(containerId, majorCount, maxVal, radius, isMini = false) {
   if(!container) return;
   container.innerHTML = ''; 
   
-  const totalTicks = majorCount * 4; // 4 minor ticks per major tick
+  // Increased density: 10 minor ticks per major tick for speedometer look
+  const minorPerMajor = 10; 
+  const totalTicks = majorCount * minorPerMajor; 
   
   for (let i = 0; i <= totalTicks; i++) {
-    const isMajor = i % 4 === 0;
+    const isMajor = i % minorPerMajor === 0;
     const tick = document.createElement('div');
     tick.className = 'tick' + (isMajor ? ' major' : '');
     
@@ -558,14 +561,14 @@ function buildScale(containerId, majorCount, maxVal, radius, isMini = false) {
 
     // Add labels on major ticks
     if (isMajor) {
-      const labelVal = (maxVal / majorCount) * (i / 4);
+      const labelVal = (maxVal / majorCount) * (i / minorPerMajor);
       if (labelVal !== 0 && labelVal !== maxVal) { // Skip 0 and max to save space
         const lbl = document.createElement('div');
         lbl.className = 'tick-label';
         lbl.textContent = Math.round(labelVal);
         
         // Push label slightly further out than the tick
-        const labelRadius = radius + (isMini ? 5 : 8);
+        const labelRadius = radius + (isMini ? 6 : 9);
         
         // We need to position the label, then counter-rotate it so the text stays upright
         lbl.style.transform = `rotate(${angle}deg) translateY(-${labelRadius}px) rotate(${-angle}deg)`;
