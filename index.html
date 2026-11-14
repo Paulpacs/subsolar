@@ -17,13 +17,17 @@
     --glass: rgba(15, 20, 18, 0.9);
     
     /* Vintage Cockpit Colors */
-    --lime: #7acc50;      /* Faded phosphorus green */
-    --amber: #d99c3b;     /* Analog warning lamp amber */
-    --red: #cc4444;       /* Dull red */
-    --cyan: #4da6b3;      /* Muted teal */
-    --white: #d1d8d6;     /* Weathered white text */
+    --lime: #7acc50;      
+    --amber: #d99c3b;     
+    --red: #cc4444;       
+    --cyan: #4da6b3;      
+    --white: #d1d8d6;     
     --warning-yellow: #d4b859;
     --text-dim: #6b7a73;
+    
+    /* LED Screen Colors */
+    --led-bg: #0a0f0c;
+    --led-green: #4af04a;
   }
 
   body {
@@ -62,7 +66,6 @@
   }
   .bracket-1 { top: 35%; left: 2%; width: 48%; height: 28%; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
   .bracket-2 { top: 35%; right: 2%; width: 48%; height: 28%; border-left: none; border-top-left-radius: 0; border-bottom-left-radius: 0; }
-  .bracket-3 { top: 65%; left: 2%; width: 96%; height: 15%; }
 
   /* PANEL BASE */
   .panel {
@@ -120,16 +123,22 @@
     opacity: 0.6;
   }
   .tick.major { height: 8px; width: 2px; background: var(--warning-yellow); opacity: 1; }
+  
+  /* Special Dual Needle Ticks */
+  .tick.dual-left { background: var(--cyan); }
+  .tick.dual-right { background: var(--amber); }
 
   /* Needle */
   .needle {
     position: absolute; bottom: 50%; left: 50%; width: 3px; height: 35px;
-    background: linear-gradient(to top, var(--amber) 0%, var(--amber) 80%, #fff 100%);
     transform-origin: bottom center; transform: rotate(-135deg);
     margin-left: -1.5px; z-index: 2;
     box-shadow: 0 1px 3px rgba(0,0,0,0.8);
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .needle.pv { background: linear-gradient(to top, var(--amber) 0%, var(--amber) 80%, #fff 100%); }
+  .needle.cyan { background: linear-gradient(to top, var(--cyan) 0%, var(--cyan) 80%, #fff 100%); }
+  
   .needle-pivot {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 8px; height: 8px; background: radial-gradient(circle, #999, #333);
@@ -167,7 +176,7 @@
   .mini-gauge .gauge-digital .num { font-size: 9px; }
   .mini-gauge .gauge-digital .lbl { font-size: 5px; }
 
-  /* TOGGLE SWITCHES & INDICATORS */
+  /* TOGGLE SWITCHES */
   .switch-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
   .switch-box {
     display: flex; align-items: center; gap: 4px;
@@ -192,48 +201,53 @@
   }
   .led.green { background: var(--lime); box-shadow: 0 0 6px rgba(122,204,80,0.6); }
   .led.red { background: var(--red); box-shadow: 0 0 6px rgba(204,68,68,0.6); }
-  .led.amber { background: var(--amber); box-shadow: 0 0 6px rgba(217,156,59,0.6); }
 
-  /* TEXT LABELS */
-  .tech-label {
-    font-size: 6px; color: var(--white); text-transform: uppercase;
-    background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 1px;
-    display: inline-block; margin-bottom: 2px; letter-spacing: 0.5px;
+  /* LED DOT MATRIX SCREEN */
+  .led-screen-panel {
+    grid-column: 1 / -1;
+    background: #000;
+    border: 2px inset #333;
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow: inset 0 0 15px #000;
+    display: flex; gap: 10px;
   }
+  .led-column { flex: 1; }
+  .led-row { 
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Courier New', monospace; font-size: 9px; 
+    color: var(--led-green); text-shadow: 0 0 4px var(--led-green);
+    margin-bottom: 2px; letter-spacing: 1px;
+  }
+  .led-row span:first-child { color: var(--text-dim); text-shadow: none; font-size: 7px; }
 
-  /* CHART PANEL (Vintage Oscilloscope) */
+  /* OSCILLOSCOPE CHART */
   .chart-panel {
     grid-column: 1 / -1;
-    height: 110px;
-    background: #080c0a; /* Dark greenish black */
+    height: 90px;
+    background: #080c0a;
     border: 2px solid #2a2a2a;
     border-radius: 4px;
     box-shadow: inset 0 0 30px #000, inset 0 0 10px rgba(122,204,80,0.05), 0 4px 8px rgba(0,0,0,0.8);
     position: relative;
     overflow: hidden;
-    margin-top: 4px;
+    margin-top: 2px;
   }
-  
-  /* Oscilloscope grid overlay */
   .chart-panel::before {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
     background-image: 
       linear-gradient(rgba(122,204,80,0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgba(122,204,80,0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-size: 15px 15px;
   }
-
-  /* CRT Scanlines */
   .chart-panel::after {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
     background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);
   }
-
   .chart-canvas { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; }
 
-  /* HIDDEN */
   .hidden { display: none !important; }
-
+  
   @keyframes flicker {
     0% { opacity: 1; }
     5% { opacity: 0.8; }
@@ -249,19 +263,18 @@
   
   <div class="warning-bracket bracket-1"></div>
   <div class="warning-bracket bracket-2"></div>
-  <div class="warning-bracket bracket-3"></div>
 
   <!-- LEFT COLUMN -->
   <div style="display: flex; flex-direction: column; gap: 6px; z-index: 2;">
     
-    <!-- MAIN GAUGE: PV POWER -->
+    <!-- PV POWER -->
     <div class="panel">
       <div class="panel-label">ГЕНЕРАЦИЯ (PV)</div>
       <div class="gauge-container">
         <div class="gauge-bezel">
-          <div class="gauge-face" id="facePv">
+          <div class="gauge-face">
             <div class="gauge-ticks" id="ticksPv"></div>
-            <div class="needle" id="needlePv"></div>
+            <div class="needle pv" id="needlePv"></div>
             <div class="needle-pivot"></div>
             <div class="gauge-digital">
               <div class="num" id="pvPower">0</div>
@@ -270,17 +283,16 @@
           </div>
         </div>
       </div>
-      <div class="tech-label">СОЛНЕЧНАЯ ПАНЕЛЬ</div>
     </div>
 
-    <!-- MAIN GAUGE: BATTERY VOLTAGE -->
+    <!-- BATTERY VOLTAGE -->
     <div class="panel">
       <div class="panel-label">АККУМУЛЯТОР (BATT)</div>
       <div class="gauge-container">
         <div class="gauge-bezel">
-          <div class="gauge-face" id="faceBatt">
+          <div class="gauge-face">
             <div class="gauge-ticks" id="ticksBatt"></div>
-            <div class="needle" id="needleBatt"></div>
+            <div class="needle pv" id="needleBatt"></div>
             <div class="needle-pivot"></div>
             <div class="gauge-digital">
               <div class="num" id="battVolt">0.0</div>
@@ -289,26 +301,22 @@
           </div>
         </div>
       </div>
-      <div class="switch-row">
-        <div class="switch-box"><div class="lbl">SYS</div><div class="toggle-handle on"></div></div>
-        <div class="switch-box"><div class="lbl">CHG</div><div class="toggle-handle" id="swCharge"></div></div>
-      </div>
     </div>
 
-    <!-- SUB-GAUGES: PV VOLT & CLOUD -->
+    <!-- MINI GAUGES: PV VOLT & CLOUD -->
     <div class="panel">
       <div class="sub-gauge-grid">
         <div class="mini-gauge">
           <div class="mini-gauge-face">
             <div class="gauge-ticks" id="ticksPvV"></div>
-            <div class="needle" id="needlePvV"></div>
+            <div class="needle pv" id="needlePvV"></div>
             <div class="gauge-digital"><div class="num" id="pvVolt">0</div><div class="lbl">PV VOLT</div></div>
           </div>
         </div>
         <div class="mini-gauge">
           <div class="mini-gauge-face">
             <div class="gauge-ticks" id="ticksCloud"></div>
-            <div class="needle" id="needleCloud"></div>
+            <div class="needle pv" id="needleCloud"></div>
             <div class="gauge-digital"><div class="num" id="cloudCover">0</div><div class="lbl">CLOUD %</div></div>
           </div>
         </div>
@@ -320,14 +328,14 @@
   <!-- RIGHT COLUMN -->
   <div style="display: flex; flex-direction: column; gap: 6px; z-index: 2;">
 
-    <!-- MAIN GAUGE: INVERTER LOAD -->
+    <!-- INVERTER LOAD -->
     <div class="panel">
       <div class="panel-label">ИНВЕРТОР (LOAD)</div>
       <div class="gauge-container">
         <div class="gauge-bezel">
-          <div class="gauge-face" id="faceInv">
+          <div class="gauge-face">
             <div class="gauge-ticks" id="ticksInv"></div>
-            <div class="needle" id="needleInv"></div>
+            <div class="needle pv" id="needleInv"></div>
             <div class="needle-pivot"></div>
             <div class="gauge-digital">
               <div class="num" id="invPower">0</div>
@@ -336,17 +344,16 @@
           </div>
         </div>
       </div>
-      <div class="tech-label">НАГРУЗКА</div>
     </div>
 
-    <!-- MAIN GAUGE: GRID POWER -->
+    <!-- GRID POWER -->
     <div class="panel">
       <div class="panel-label">СЕТЬ (GRID)</div>
       <div class="gauge-container">
         <div class="gauge-bezel">
-          <div class="gauge-face" id="faceGrid">
+          <div class="gauge-face">
             <div class="gauge-ticks" id="ticksGrid"></div>
-            <div class="needle" id="needleGrid"></div>
+            <div class="needle pv" id="needleGrid"></div>
             <div class="needle-pivot"></div>
             <div class="gauge-digital">
               <div class="num" id="gridPower">0</div>
@@ -355,26 +362,22 @@
           </div>
         </div>
       </div>
-      <div class="switch-row">
-        <div class="switch-box"><div class="lbl">GRID</div><div class="toggle-handle" id="swGrid"></div></div>
-        <div class="led" id="ledGridStatus"></div>
-      </div>
     </div>
 
-    <!-- SUB-GAUGES: AMPS & TEMP -->
+    <!-- MINI GAUGES: AMPS & TEMP -->
     <div class="panel">
       <div class="sub-gauge-grid">
         <div class="mini-gauge">
           <div class="mini-gauge-face">
             <div class="gauge-ticks" id="ticksAmps"></div>
-            <div class="needle" id="needleAmps"></div>
+            <div class="needle pv" id="needleAmps"></div>
             <div class="gauge-digital"><div class="num" id="battAmps">0.0</div><div class="lbl">AMPS</div></div>
           </div>
         </div>
         <div class="mini-gauge">
           <div class="mini-gauge-face">
             <div class="gauge-ticks" id="ticksTemp"></div>
-            <div class="needle" id="needleTemp"></div>
+            <div class="needle pv" id="needleTemp"></div>
             <div class="gauge-digital"><div class="num" id="dhtTemp">0</div><div class="lbl">ROOM T</div></div>
           </div>
         </div>
@@ -383,40 +386,65 @@
 
   </div>
 
-  <!-- BOTTOM PANEL: FLOORS & ENERGY -->
-  <div class="panel" style="grid-column: 1 / -1; display: flex; gap: 8px; z-index: 2;">
+  <!-- SHARED FLOOR GAUGE & EXTRA MINI GAUGES -->
+  <div class="panel" style="grid-column: 1 / -1; z-index: 2;">
+    <div class="panel-label">РАСПРЕДЕЛЕНИЕ (FLOORS)</div>
     
-    <div style="flex: 1;">
-      <div class="tech-label">ПОТРЕБЛЕНИЕ ЭТАЖЕЙ</div>
-      <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-        <div class="switch-box" style="width: 100%; justify-content: space-between;">
-          <div class="lbl">1ST FLOOR</div>
-          <div class="num" style="font-size: 9px; color: var(--cyan);" id="floor1">0 W</div>
-        </div>
-        <div class="switch-box" style="width: 100%; justify-content: space-between;">
-          <div class="lbl">2ND FLOOR</div>
-          <div class="num" style="font-size: 9px; color: var(--amber);" id="floorGrid">0 W</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="flex: 1;">
-      <div class="tech-label">ЭНЕРГИЯ СЕГОДНЯ</div>
-      <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-        <div class="switch-box" style="width: 100%; justify-content: space-between;">
-          <div class="lbl">PV GEN</div>
-          <div class="num" style="font-size: 9px; color: var(--lime);" id="todayPv">0.0</div>
-        </div>
-        <div class="switch-box" style="width: 100%; justify-content: space-between;">
-          <div class="lbl">INV LOAD</div>
-          <div class="num" style="font-size: 9px; color: var(--lime);" id="todayInv">0.0</div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      
+      <!-- Dual Needle Gauge for Floors -->
+      <div class="gauge-container" style="width: 100px; height: 100px; margin: 0;">
+        <div class="gauge-bezel">
+          <div class="gauge-face">
+            <!-- Ticks generated via JS -->
+            <div class="gauge-ticks" id="ticksDual"></div>
+            <!-- Left Needle (1st Floor) -->
+            <div class="needle cyan" id="needleFloor1" style="height: 32px;"></div>
+            <!-- Right Needle (2nd Floor) -->
+            <div class="needle pv" id="needleFloor2" style="height: 32px;"></div>
+            <div class="needle-pivot"></div>
+          </div>
         </div>
       </div>
-    </div>
 
+      <!-- SOC & HUMIDITY MINI GAUGES -->
+      <div style="display: flex; gap: 4px; flex: 1;">
+        <div class="mini-gauge" style="max-width: 50px;">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksSoc"></div>
+            <div class="needle pv" id="needleSoc"></div>
+            <div class="gauge-digital"><div class="num" id="battSoc">0</div><div class="lbl">SOC</div></div>
+          </div>
+        </div>
+        <div class="mini-gauge" style="max-width: 50px;">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksHum"></div>
+            <div class="needle pv" id="needleHum"></div>
+            <div class="gauge-digital"><div class="num" id="dhtHum">0</div><div class="lbl">HUM %</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <!-- CHART PANEL (Vintage Oscilloscope) -->
+  <!-- LED DOT MATRIX SCREEN (Energy Totals) -->
+  <div class="led-screen-panel">
+    <div class="led-column">
+      <div class="led-row"><span>TODAY</span><span>kWh</span></div>
+      <div class="led-row"><span>PV GEN</span><span id="todayPv">0.0</span></div>
+      <div class="led-row"><span>INV LOAD</span><span id="todayInv">0.0</span></div>
+      <div class="led-row"><span>GRID USE</span><span id="todayGrid">0.0</span></div>
+    </div>
+    <div class="led-column" style="border-left: 1px solid #222; padding-left: 10px;">
+      <div class="led-row"><span>YESTERDAY</span><span>kWh</span></div>
+      <div class="led-row"><span>PV GEN</span><span id="yestPv">0.0</span></div>
+      <div class="led-row"><span>INV LOAD</span><span id="yestInv">0.0</span></div>
+      <div class="led-row"><span>GRID USE</span><span id="yestGrid">0.0</span></div>
+    </div>
+  </div>
+
+  <!-- CHART PANEL -->
   <div class="chart-panel">
     <canvas id="chartAll" class="chart-canvas"></canvas>
   </div>
@@ -433,20 +461,6 @@
 <div class="hidden" id="wIrrNext">—</div>
 <div class="hidden" id="wCloudNext">—</div>
 <div class="hidden" id="wSun">—</div>
-<div class="hidden" id="mTodayPv">—</div>
-<div class="hidden" id="mYestPv">—</div>
-<div class="hidden" id="mTodayInv">—</div>
-<div class="hidden" id="mYestInv">—</div>
-<div class="hidden" id="mTodayGrid">—</div>
-<div class="hidden" id="mYestGrid">—</div>
-<div class="hidden" id="led129">—</div>
-<div class="hidden" id="led124">—</div>
-<div class="hidden" id="led100">—</div>
-<div class="hidden" id="ledMppt">—</div>
-<div class="hidden" id="ledAc">—</div>
-<div class="hidden" id="ledAcSrc">—</div>
-<div class="hidden" id="gridVolt">—</div>
-<div class="hidden" id="battSoc">—</div>
 
 <script>
 const GITHUB_API_URL = 'https://api.github.com/repos/Paulpacs/solar-mobile/contents/live_data.json';
@@ -470,6 +484,7 @@ function buildTicks(containerId, count, majorEvery, radius = 50) {
   }
 }
 
+// Generate standard ticks
 buildTicks('ticksPv', 20, 4, 50);
 buildTicks('ticksBatt', 20, 4, 50);
 buildTicks('ticksInv', 20, 4, 50);
@@ -478,6 +493,25 @@ buildTicks('ticksPvV', 15, 3, 30);
 buildTicks('ticksCloud', 10, 2, 30);
 buildTicks('ticksAmps', 20, 4, 30);
 buildTicks('ticksTemp', 10, 2, 30);
+buildTicks('ticksSoc', 10, 2, 30);
+buildTicks('ticksHum', 10, 2, 30);
+
+// Generate the Custom Dual Needle Ticks for Floors
+const dualContainer = document.getElementById('ticksDual');
+for (let i = 0; i <= 10; i++) {
+  const tickL = document.createElement('div');
+  tickL.className = 'tick dual-left';
+  const angleL = -135 + (135 * (i / 10));
+  tickL.style.transform = `rotate(${angleL}deg) translateY(-42px)`;
+  dualContainer.appendChild(tickL);
+
+  const tickR = document.createElement('div');
+  tickR.className = 'tick dual-right';
+  const angleR = 135 - (135 * (i / 10));
+  tickR.style.transform = `rotate(${angleR}deg) translateY(-42px)`;
+  dualContainer.appendChild(tickR);
+}
+
 
 function setNeedle(needleId, val, max) {
   const needle = document.getElementById(needleId);
@@ -485,6 +519,24 @@ function setNeedle(needleId, val, max) {
   const frac = Math.max(0, Math.min(1, val / max));
   const angle = -135 + (270 * frac);
   needle.style.transform = `rotate(${angle}deg)`;
+}
+
+function setDualNeedles(valLeft, valRight, total) {
+  const n1 = document.getElementById('needleFloor1');
+  const n2 = document.getElementById('needleFloor2');
+  if (!n1 || !n2) return;
+
+  // Calculate percentages (if total is 0, drop needles to 0)
+  let pct1 = total > 0 ? (valLeft / total) : 0;
+  let pct2 = total > 0 ? (valRight / total) : 0;
+
+  // Map left needle to left half of dial (-135 to 0)
+  const angle1 = -135 + (135 * pct1);
+  n1.style.transform = `rotate(${angle1}deg)`;
+
+  // Map right needle to right half of dial (135 to 0)
+  const angle2 = 135 - (135 * pct2);
+  n2.style.transform = `rotate(${angle2}deg)`;
 }
 
 /* ---------- WEATHER ---------- */
@@ -534,9 +586,9 @@ function drawCombinedChart() {
   ctx.clearRect(0, 0, w, h);
 
   const series = [
-    { key: 'pv',   color: '#7acc50', fill: 'rgba(122,204,80,0.05)' },   /* Vintage Phosphor Green */
-    { key: 'grid', color: '#cc4444', fill: 'rgba(204,68,68,0.05)' },    /* Muted Warning Red */
-    { key: 'inv',  color: '#d99c3b', fill: 'rgba(217,156,59,0.05)' }    /* Analog Amber */
+    { key: 'pv',   color: '#7acc50', fill: 'rgba(122,204,80,0.05)' },   
+    { key: 'grid', color: '#cc4444', fill: 'rgba(204,68,68,0.05)' },    
+    { key: 'inv',  color: '#d99c3b', fill: 'rgba(217,156,59,0.05)' }    
   ];
 
   const max = 2000;
@@ -570,7 +622,6 @@ function drawCombinedChart() {
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     
-    // Glow effect
     ctx.shadowColor = s.color;
     ctx.shadowBlur = 6;
     ctx.stroke();
@@ -647,6 +698,8 @@ async function fetchData() {
     document.getElementById('pvVolt').textContent = pvVolt !== null ? Math.round(pvVolt) : '0';
     document.getElementById('cloudCover').textContent = cloud !== null ? Math.round(cloud) : '0';
     document.getElementById('dhtTemp').textContent = dhtTemp !== null ? Math.round(dhtTemp) : '0';
+    document.getElementById('battSoc').textContent = battSoc !== null ? Math.round(battSoc) : '0';
+    document.getElementById('dhtHum').textContent = dhtHum !== null ? Math.round(dhtHum) : '0';
     
     const totalLoad = (invPower||0) + ((invPower||0) > 0 ? 100 : 0);
     const diff = (pvPower||0) - totalLoad;
@@ -664,30 +717,29 @@ async function fetchData() {
     setNeedle('needleCloud', cloud || 0, 100);
     setNeedle('needleAmps', Math.abs(amps), 50);
     setNeedle('needleTemp', dhtTemp || 0, 50);
+    setNeedle('needleSoc', battSoc || 0, 100);
+    setNeedle('needleHum', dhtHum || 0, 100);
 
-    // Switches & LEDs
-    const swCharge = document.getElementById('swCharge');
-    if (amps > 0) swCharge.className = 'toggle-handle on'; else swCharge.className = 'toggle-handle';
-
-    const swGrid = document.getElementById('swGrid');
-    const ledGrid = document.getElementById('ledGridStatus');
-    if (Number(data.grid_voltage) > 0) {
-      swGrid.className = 'toggle-handle on';
-      ledGrid.className = 'led green';
-    } else {
-      swGrid.className = 'toggle-handle';
-      ledGrid.className = 'led red';
-    }
-
-    // Floors & Energy
+    // Dual Needle Floor Gauge
     const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
-    document.getElementById('floor1').textContent = Math.round(floor1) + ' W';
-    document.getElementById('floorGrid').textContent = Math.round(floorGrid || 0) + ' W';
+    setDualNeedles(floor1, floorGrid || 0, totalGrid || 0);
 
+    // LED Screen (Daily Totals)
     const todayPv = num(data.today_pv_kwh) || 0;
     const todayInv = num(data.today_inverter_kwh) || 0;
-    document.getElementById('todayPv').textContent = todayPv.toFixed(1) + ' kWh';
-    document.getElementById('todayInv').textContent = todayInv.toFixed(1) + ' kWh';
+    const todayGrid = num(data.today_grid_kwh) || 0;
+    
+    const yestPv = num(data.yesterday_pv_kwh) || 0;
+    const yestInv = num(data.yesterday_inverter_kwh) || 0;
+    const yestGrid = num(data.yesterday_grid_kwh) || 0;
+
+    document.getElementById('todayPv').textContent = todayPv.toFixed(1);
+    document.getElementById('todayInv').textContent = todayInv.toFixed(1);
+    document.getElementById('todayGrid').textContent = todayGrid.toFixed(1);
+
+    document.getElementById('yestPv').textContent = yestPv.toFixed(1);
+    document.getElementById('yestInv').textContent = yestInv.toFixed(1);
+    document.getElementById('yestGrid').textContent = yestGrid.toFixed(1);
 
     // Chart
     if (pvPower !== null) recordSample('pv', pvPower);
