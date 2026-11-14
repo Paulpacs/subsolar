@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050807">
+<title>Paulpacs Solar — Mobile Submarine</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #050807;
+    --panel-bg: #111815;
+    --panel-light: #1a2420;
+    --bezel: #0a0f0c;
+    --bezel-light: #3d4a42;
+    --brass: #c9a227;
+    --brass-light: #e8c95a;
+    --sonar: #6bffb8;
+    --sonar-dim: #2a8a5c;
+    --red: #ff4d4d;
+    --amber: #ffb84d;
+    --cyan: #30e5ff;
+    --text: #eafff5;
+    --text-dim: #6a8a7a;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 50% 0%, #0d1411 0%, #000 75%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.4) 0px, rgba(0,0,0,.4) 1px, transparent 1px, transparent 3px);
+    margin: 0; min-height: 100vh;
+    font-family: 'Courier New', ui-monospace, monospace;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 20px;
+  }
+
+  /* CRT scanline overlay */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center; padding: 12px 10px 8px;
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 70%, transparent);
+    backdrop-filter: blur(4px);
+  }
+  .header h1 {
+    margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 6px;
+    color: var(--brass-light);
+    text-shadow: 0 0 4px var(--brass), 0 0 12px rgba(201,162,39,.5);
+  }
+  .header p {
+    margin: 2px 0 0; font-size: 8px; color: var(--sonar);
+    letter-spacing: 3px; font-weight: bold;
+    text-shadow: 0 0 6px var(--sonar);
+  }
+  .clock {
+    margin-top: 6px; display: inline-block;
+    font-size: 11px; color: var(--sonar); letter-spacing: 2px;
+    font-weight: bold; font-variant-numeric: tabular-nums;
+    padding: 2px 12px;
+    border: 1px solid var(--sonar-dim);
+    border-radius: 4px;
+    background: rgba(0,20,10,.8);
+    box-shadow: inset 0 0 8px rgba(107,255,184,.15), 0 0 8px rgba(107,255,184,.2);
+  }
+
+  /* DASHBOARD LAYOUT */
+  .dashboard {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 8px; max-width: 600px; margin: 0 auto;
+  }
+
+  /* PANELS */
+  .panel {
+    position: relative;
+    background: linear-gradient(160deg, var(--panel-light) 0%, var(--panel-bg) 40%, #050807 100%);
+    border: 1px solid var(--brass-dark);
+    border-radius: 8px;
+    padding: 10px 8px 8px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 12px rgba(0,0,0,.6);
+  }
+  .panel::after {
+    content: ''; position: absolute; inset: 3px; border-radius: 5px;
+    border: 1px solid rgba(201,162,39,.15); pointer-events: none;
+  }
+  .panel::before {
+    content: ''; position: absolute; inset: 5px; border-radius: 6px; pointer-events: none;
+    background:
+      radial-gradient(circle at 6px 6px, #4a4a4a 1.5px, transparent 2px),
+      radial-gradient(circle at calc(100% - 6px) 6px, #4a4a4a 1.5px, transparent 2px),
+      radial-gradient(circle at 6px calc(100% - 6px), #4a4a4a 1.5px, transparent 2px),
+      radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #4a4a4a 1.5px, transparent 2px);
+    opacity: .6;
+  }
+
+  .panel-title {
+    font-size: 9px; font-weight: 900; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 8px;
+    color: var(--brass-light); display: flex; align-items: center; gap: 6px;
+    text-shadow: 0 0 4px rgba(201,162,39,.5);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px currentColor; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+
+  /* MAIN GAUGES (2x2 Grid) */
+  .gauge-grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  
+  .gauge-main {
+    position: relative; aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #0a1812 0%, #000 75%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,.9), 0 0 0 2px #0a0f0c, 0 0 0 4px var(--brass-dark), 0 0 0 5px rgba(201,162,39,.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .gauge-main:active { transform: scale(0.98); }
+  .gauge-main svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(135deg); }
+  .gauge-main .track { fill: none; stroke: rgba(107,255,184,.08); stroke-linecap: round; }
+  .gauge-main .value-arc { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1); filter: drop-shadow(0 0 4px currentColor); }
+  
+  .gauge-main .val { font-size: 22px; font-weight: 900; line-height: 1; z-index: 2; text-shadow: 0 0 8px currentColor; }
+  .gauge-main .unit { font-size: 8px; opacity: .8; margin-top: 2px; z-index: 2; letter-spacing: 1px; }
+  .gauge-main .sub { font-size: 7px; opacity: .6; margin-top: 2px; z-index: 2; text-transform: uppercase; }
+
+  /* SMALL GAUGES & METERS */
+  .mini-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .mini-box {
+    background: #000; border: 1px solid #1a2420; border-radius: 4px;
+    padding: 6px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center;
+  }
+  .mini-box .lbl { font-size: 7px; font-weight: 800; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+  .mini-box .val { font-size: 14px; font-weight: 900; margin-top: 2px; font-family: monospace; }
+
+  /* HORIZONTAL METERS */
+  .h-meter { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+  .h-meter-label { display: flex; justify-content: space-between; font-size: 8px; font-weight: bold; color: var(--text-dim); letter-spacing: 1px; }
+  .h-meter-track {
+    height: 10px; background: #050807; border: 1px solid var(--bezel-light);
+    border-radius: 2px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
+    background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,0.05) calc(10% - 1px), rgba(255,255,255,0.05) 10%);
+  }
+  .h-meter-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; background: var(--cyan); transition: width 0.6s ease; box-shadow: inset 0 0 6px rgba(255,255,255,0.4); }
+
+  /* LED INDICATORS */
+  .led-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .led {
+    background: #0a0f0c; border: 1px solid #222; border-radius: 4px;
+    padding: 4px; text-align: center; font-size: 8px; font-weight: bold; letter-spacing: 1px;
+    color: #444; transition: all 0.3s;
+  }
+  .led.on { background: rgba(107,255,184,0.15); border-color: var(--sonar); color: var(--sonar); box-shadow: 0 0 8px rgba(107,255,184,0.4); }
+  .led.off { background: rgba(255,77,77,0.15); border-color: var(--red); color: var(--red); box-shadow: 0 0 8px rgba(255,77,77,0.4); }
+
+  /* CHART PANEL */
+  .chart-wrapper {
+    position: relative; height: 140px; width: 100%;
+    border: 1px solid rgba(107,255,184,.2); border-radius: 4px;
+    background: linear-gradient(rgba(107,255,184,.04) 1px, transparent 1px) 0 0 / 100% 25%, radial-gradient(ellipse at 50% 50%, #061a10 0%, #000 80%);
+    box-shadow: inset 0 0 20px rgba(0,0,0,.9);
+    overflow: hidden;
+  }
+  .chart-wrapper canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+
+  /* MODAL STYLES (Re-used from original) */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px);
+    display: none; justify-content: center; align-items: center; z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-content {
+    background: #03132a; border: 1px solid var(--off-gray);
+    border-radius: 15px; width: 90%; max-width: 400px; padding: 20px;
+    box-shadow: 0 0 30px #d1d5db30; max-height: 90vh; overflow-y: auto;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; border-bottom: 1px solid #15416a; padding-bottom: 10px;
+  }
+  .modal-title { font-size: 14px; font-weight: 850; color: var(--off-gray); letter-spacing: 1px; }
+  .modal-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+  .energy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .energy-card {
+    background: #04162beF; border: 1px solid var(--gold);
+    border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .energy-label { font-size: 9px; font-weight: 800; color: #ffda83; margin-bottom: 4px; display: block; }
+  .energy-val-today { font-size: 16px; font-weight: 900; color: var(--green); display: block; }
+  .energy-val-yest { font-size: 11px; font-weight: 700; color: #a6d6f2; display: block; margin-top: 4px; }
+  .dynamic-date { font-size: 9px; color: #8beaff; font-weight: 800; display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PAULPACS</h1>
+  <p>MOBILE SUBMARINE CONSOLE</p>
+  <div class="clock" id="clock">--:--:--</div>
+</div>
+
+<div class="dashboard">
+
+  <!-- MAIN GAUGES (2x2) -->
+  <div class="gauge-grid-main">
+    <!-- PV POWER -->
+    <div class="gauge-main" onclick="openPvModal()">
+      <svg viewBox="0 0 100 100">
+        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
+        <circle class="value-arc" id="pvArc" cx="50" cy="50" r="42" stroke="#30e5ff" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
+      </svg>
+      <div class="val" style="color:#30e5ff;" id="pvpower">—</div>
+      <div class="unit">WATTS</div>
+      <div class="sub">PV POWER</div>
+    </div>
+    <!-- INVERTER POWER -->
+    <div class="gauge-main" onclick="openInvModal()">
+      <svg viewBox="0 0 100 100">
+        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
+        <circle class="value-arc" id="invArc" cx="50" cy="50" r="42" stroke="#6bffb8" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
+      </svg>
+      <div class="val" style="color:#6bffb8;" id="invpower">—</div>
+      <div class="unit">WATTS</div>
+      <div class="sub">INVERTER</div>
+    </div>
+    <!-- TOTAL GRID -->
+    <div class="gauge-main" onclick="openGridModal()">
+      <svg viewBox="0 0 100 100">
+        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
+        <circle class="value-arc" id="gridArc" cx="50" cy="50" r="42" stroke="#ff4d4d" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
+      </svg>
+      <div class="val" style="color:#ff4d4d;" id="totalgrid">—</div>
+      <div class="unit">WATTS</div>
+      <div class="sub">GRID TOTAL</div>
+    </div>
+    <!-- BATTERY VOLTAGE -->
+    <div class="gauge-main" onclick="openBattModal()">
+      <svg viewBox="0 0 100 100">
+        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
+        <circle class="value-arc" id="battArc" cx="50" cy="50" r="42" stroke="#a6ff70" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
+      </svg>
+      <div class="val" style="color:#a6ff70;" id="battery">—</div>
+      <div class="unit">VOLTS</div>
+      <div class="sub">BATTERY</div>
+    </div>
+  </div>
+
+  <!-- SMALL GAUGES / METERS -->
+  <div class="panel">
+    <div class="panel-title"><span class="dot" style="background:var(--cyan);color:var(--cyan)"></span>SYSTEM METRICS</div>
+    
+    <div class="mini-grid">
+      <div class="mini-box" onclick="openPvModal()">
+        <div class="lbl">EST PV</div><div class="val" style="color:var(--cyan);" id="expectedPv">—</div>
+      </div>
+      <div class="mini-box" onclick="openPvModal()">
+        <div class="lbl">PV VOLT</div><div class="val" style="color:var(--cyan);" id="pvvoltage">—</div>
+      </div>
+      <div class="mini-box" onclick="openBattModal()">
+        <div class="lbl">SOC</div><div class="val" style="color:#a6ff70;" id="soc">—</div>
+      </div>
+      <div class="mini-box" onclick="openWeatherModal()">
+        <div class="lbl">CLOUD</div><div class="val" style="color:var(--amber);" id="cloudCover">—</div>
+      </div>
+      <div class="mini-box" onclick="openAcModal()">
+        <div class="lbl">ROOM T</div><div class="val" style="color:var(--amber);" id="dhtTemp">—</div>
+      </div>
+      <div class="mini-box" onclick="openAcModal()">
+        <div class="lbl">ROOM H</div><div class="val" style="color:var(--amber);" id="dhtHum">—</div>
+      </div>
+    </div>
+
+    <!-- HORIZONTAL BARS -->
+    <div class="h-meter">
+      <div class="h-meter-label"><span>1ST FLOOR</span><span id="floor1">— W</span></div>
+      <div class="h-meter-track"><div class="h-meter-fill" id="floor1Bar" style="background:var(--cyan);"></div></div>
+    </div>
+    <div class="h-meter">
+      <div class="h-meter-label"><span>2ND FLOOR</span><span id="floorgrid">— W</span></div>
+      <div class="h-meter-track"><div class="h-meter-fill" id="floor2Bar" style="background:var(--amber);"></div></div>
+    </div>
+    <div class="h-meter">
+      <div class="h-meter-label"><span>BATTERY AMPS</span><span id="battAmpsLabel">— A</span></div>
+      <div class="h-meter-track"><div class="h-meter-fill" id="battAmpsBar" style="background:#a6ff70;"></div></div>
+    </div>
+
+    <!-- LED INDICATORS -->
+    <div class="led-grid">
+      <div class="led" id="led129">ESP129</div>
+      <div class="led" id="led124">ESP124</div>
+      <div class="led" id="led100">METER</div>
+    </div>
+  </div>
+
+  <!-- CHART PANEL -->
+  <div class="panel">
+    <div class="panel-title" style="margin-bottom:6px;"><span class="dot" style="background:var(--sonar);color:var(--sonar)"></span>POWER HISTORY</div>
+    <div class="chart-wrapper">
+      <canvas id="chartAll"></canvas>
+    </div>
+  </div>
+
+  <!-- HIDDEN ELEMENTS FOR MODAL COMPATIBILITY -->
+  <div id="gridvoltage" style="display:none;">—</div>
+  <div id="wRain" style="display:none;">—</div>
+  <div id="acCard" class="ac-read" style="display:none;"></div>
+  <div id="acLabel" style="display:none;"></div>
+  <div id="acValue" style="display:none;"></div>
+  <div id="floorGridCard" class="floor-grid" style="display:none;"></div>
+  <div id="floorGridLabel" style="display:none;"></div>
+  <div id="mTodayPv" style="display:none;"></div>
+  <div id="mYestPv" style="display:none;"></div>
+  <div id="mTodayInv" style="display:none;"></div>
+  <div id="mYestInv" style="display:none;"></div>
+  <div id="mTodayFloor" style="display:none;"></div>
+  <div id="mYestFloor" style="display:none;"></div>
+  <div id="mTodayGrid" style="display:none;"></div>
+  <div id="mYestGrid" style="display:none;"></div>
+
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- PV Details Modal -->
+<div class="modal-overlay" id="pvModal">
+  <div class="modal-content" style="border-color: var(--cyan); box-shadow: 0 0 30px #30e5ff30;">
+    <div class="modal-header" style="border-bottom: 1px solid #145080;">
+      <div class="modal-title" style="color: var(--cyan);">PV SYSTEM STATUS</div>
+      <button class="modal-close" onclick="closePvModal()">✕</button>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 15px;">
+      <div class="energy-card" style="border-color: var(--cyan); background: #04162beF;">
+        <span class="energy-label" style="color: var(--cyan);">PV POWER</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalPvPower">— W</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--cyan); background: #04162beF;">
+        <span class="energy-label" style="color: var(--cyan);">PV VOLTAGE</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalPvVoltage">— V</span>
+      </div>
+    </div>
+    <div style="font-size: 12px; line-height: 1.6; color: #eaf7ff; background: #03132a; padding: 12px; border-radius: 8px; border: 1px solid #15416a;">
+      <p style="margin: 0 0 8px 0;">You are using <strong style="color: var(--cyan);" id="modalPvUsage">—%</strong> of your PV capacity.</p>
+      <p style="margin: 0 0 8px 0;">PV performance is <strong style="color: var(--cyan);" id="modalPvPerf">—%</strong> against projected PV estimates.</p>
+      <p style="margin: 0 0 8px 0; font-size: 11px; color: #a6d6f2; line-height: 1.4;" id="modalPvExplanation">—</p>
+      <p style="margin: 0 0 12px 0;">MPPT is <strong id="modalMpptStatus" style="color: var(--green);">—</strong> power from PV Array.</p>
+      <div style="border-top: 1px solid #15416a; padding-top: 10px; margin-top: 10px; font-size: 11px; color: #a6d6f2;">
+        <strong style="color: #8beaff; letter-spacing: 0.5px;">PV ARRAY CONFIGURATION:</strong><br>
+        3 PV at 595W each connected in series.<br>Total capacity is 1785W.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Window AC Modal -->
+<div class="modal-overlay" id="acModal">
+  <div class="modal-content" id="acModalContent">
+    <div class="modal-header" id="acModalHeader">
+      <div class="modal-title" id="acModalTitle">WINDOW AC</div>
+      <button class="modal-close" onclick="closeAcModal()">✕</button>
+    </div>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <div style="font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 4px;">SAMSUNG</div>
+      <div style="font-size: 11px; color: #a6d6f2;">1.5HP Air Conditioner, non-inverter window type.<br>Rated power: 1240W | Room Temp & Humidity</div>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 15px;">
+      <div class="energy-card" id="acModalStatusCard">
+        <span class="energy-label" id="acModalStatusLabel">STATUS</span>
+        <span class="energy-val-today" id="acModalStatusValue" style="color: #fff;">OFF</span>
+      </div>
+      <div class="energy-card" id="acModalPowerCard">
+        <span class="energy-label" id="acModalPowerLabel">POWER SUPPLY</span>
+        <span class="energy-val-today" id="acModalPowerValue" style="color: #fff;">—</span>
+      </div>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 0;">
+      <div class="energy-card" id="acModalTempCard">
+        <span class="energy-label" id="acModalTempLabel">ROOM TEMP</span>
+        <span class="energy-val-today" id="acModalTempValue" style="color: #fff;">— °C</span>
+      </div>
+      <div class="energy-card" id="acModalHumCard">
+        <span class="energy-label" id="acModalHumLabel">HUMIDITY</span>
+        <span class="energy-val-today" id="acModalHumValue" style="color: #fff;">— %</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inverter Modal -->
+<div class="modal-overlay" id="invModal">
+  <div class="modal-content" style="border-color: var(--green); box-shadow: 0 0 30px #4cffb030;">
+    <div class="modal-header" style="border-bottom: 1px solid #15416a;">
+      <div class="modal-title" style="color: var(--green);">INVERTER STATUS</div>
+      <button class="modal-close" onclick="closeInvModal()">✕</button>
+    </div>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <div style="font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 2px;">POWMR HYBRID INVERTER</div>
+      <div style="font-size: 11px; color: #a6d6f2;">POW-HVM6.5K-48V-E | 6.5kW / 48V</div>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 15px;">
+      <div class="energy-card" style="border-color: var(--green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--green);">INVERTER LOAD</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalInvPower">— W</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--green);">LOAD CAPACITY</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalInvLoadPct">—%</span>
+      </div>
+    </div>
+    <div style="font-size: 12px; line-height: 1.6; color: #eaf7ff; background: #03132a; padding: 12px; border-radius: 8px; border: 1px solid #15416a;">
+      <p style="margin: 0 0 8px 0;">Load is at <strong style="color: var(--green);" id="modalInvCapacity">—%</strong> of the inverter's 6500W rated capacity.</p>
+      <p style="margin: 0 0 8px 0;">PV input is at <strong style="color: var(--cyan);" id="modalInvPvCapacity">—%</strong> of the inverter's 8000W max solar capacity.</p>
+      <p style="margin: 0 0 12px 0;">MPPT range: 60–500V. Current PV input: <strong id="modalInvMpptStatus" style="color: var(--green);">— V</strong>.</p>
+      <div style="border-top: 1px solid #15416a; padding-top: 10px; margin-top: 10px; font-size: 11px; color: #a6d6f2;">
+        <strong style="color: #8beaff; letter-spacing: 0.5px;">HARDWARE SPECIFICATIONS:</strong><br>
+        Rated Output: 6500W<br>Max PV Input: 8000W<br>MPPT Range: 60–500V<br>Battery System: 48V DC
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Battery Modal -->
+<div class="modal-overlay" id="battModal">
+  <div class="modal-content" style="border-color: var(--batt-green); box-shadow: 0 0 30px #a6ff7030;">
+    <div class="modal-header" style="border-bottom: 1px solid #15416a;">
+      <div class="modal-title" style="color: var(--batt-green);">BATTERY STATUS</div>
+      <button class="modal-close" onclick="closeBattModal()">✕</button>
+    </div>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <div style="font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 2px;">LIFEPO4 BATTERY BANK</div>
+      <div style="font-size: 11px; color: #a6d6f2;">16S8P (36Ah) | 10A Active Balancer</div>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 15px;">
+      <div class="energy-card" style="border-color: var(--batt-green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--batt-green);">VOLTAGE</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalBattVolt">— V</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--batt-green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--batt-green);">STATE OF CHARGE</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalBattSoc">— %</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--batt-green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--batt-green);">CURRENT</span>
+        <span class="energy-val-today" id="modalBattCurrent" style="color: #fff;">— A</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--batt-green); background: #04162beF;">
+        <span class="energy-label" style="color: var(--batt-green);">POWER FLOW</span>
+        <span class="energy-val-today" id="modalBattFlow" style="color: #fff; font-size: 14px;">—</span>
+      </div>
+    </div>
+    <div style="font-size: 12px; line-height: 1.6; color: #eaf7ff; background: #03132a; padding: 12px; border-radius: 8px; border: 1px solid #15416a;">
+      <p style="margin: 0 0 8px 0;" id="modalBattStatusText">—</p>
+      <p style="margin: 0 0 8px 0;" id="modalBattTimeText">—</p>
+      <p style="margin: 0 0 12px 0;">Active balancer (10A) keeping cells in sync.</p>
+      <div style="border-top: 1px solid #15416a; padding-top: 10px; margin-top: 10px; font-size: 11px; color: #a6d6f2;">
+        <strong style="color: #caff9c; letter-spacing: 0.5px;">BATTERY SPECS:</strong><br>
+        Chemistry: LiFePO4 (32650)<br>Configuration: 16S8P | 51.2V Nominal<br>Estimated Capacity: 36Ah (1.84 kWh)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grid Modal -->
+<div class="modal-overlay" id="gridModal">
+  <div class="modal-content" style="border-color: var(--red); box-shadow: 0 0 30px #ff2a2a30;">
+    <div class="modal-header" style="border-bottom: 1px solid #15416a;">
+      <div class="modal-title" style="color: var(--red);">GRID & HOUSE BREAKDOWN</div>
+      <button class="modal-close" onclick="closeGridModal()">✕</button>
+    </div>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <div style="font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 2px;">UTILITY GRID STATUS</div>
+      <div style="font-size: 11px; color: #a6d6f2;">Off-Grid Fallback Mode</div>
+    </div>
+    <div class="energy-grid" style="margin-bottom: 15px;">
+      <div class="energy-card" style="border-color: var(--red); background: #04162beF;">
+        <span class="energy-label" style="color: var(--red);">TOTAL GRID</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalGridTotal">— W</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--red); background: #04162beF;">
+        <span class="energy-label" style="color: var(--red);">GRID VOLTAGE</span>
+        <span class="energy-val-today" id="modalGridVolt" style="color: #fff;">— V</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--red); background: #04162beF;">
+        <span class="energy-label" style="color: var(--red);">1ST FLR (KITCHEN)</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalGridFloor1">— W</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--red); background: #04162beF;">
+        <span class="energy-label" style="color: var(--red);">2ND FLR (AC/LIGHTS)</span>
+        <span class="energy-val-today" style="color: #fff;" id="modalGridFloor2">— W</span>
+      </div>
+    </div>
+    <div style="font-size: 12px; line-height: 1.6; color: #eaf7ff; background: #03132a; padding: 12px; border-radius: 8px; border: 1px solid #15416a;">
+      <p style="margin: 0 0 8px 0;" id="modalGridStatusText">—</p>
+      <p style="margin: 0 0 8px 0;" id="modalGridOffsetText">—</p>
+      <div style="border-top: 1px solid #15416a; padding-top: 10px; margin-top: 10px; font-size: 11px; color: #a6d6f2;">
+        <strong style="color: #ffca9b; letter-spacing: 0.5px;">HOUSE POWER CONFIG:</strong><br>
+        1st Floor: Kitchen (Always on Grid)<br>2nd Floor: AC & Lights (Solar/Grid Switchable)<br>Nominal Voltage: 220V AC
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Energy Modal -->
+<div class="modal-overlay" id="energyModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">ENERGY SUMMARY</div>
+      <button class="modal-close" onclick="closeEnergyModal()">✕</button>
+    </div>
+    <div class="energy-grid">
+      <div class="energy-card" style="border-color: var(--cyan);">
+        <span class="energy-label" style="color: var(--cyan);">PV GENERATED</span>
+        <span class="dynamic-date" id="todayLabel1">—</span>
+        <span class="energy-val-today" id="mTodayPv">—</span>
+        <span class="energy-val-yest"><span id="yestLabel1">—</span> <span id="mYestPv">—</span></span>
+      </div>
+      <div class="energy-card" style="border-color: var(--green);">
+        <span class="energy-label" style="color: var(--green);">INVERTER LOAD</span>
+        <span class="dynamic-date" id="todayLabel2">—</span>
+        <span class="energy-val-today" id="mTodayInv">—</span>
+        <span class="energy-val-yest"><span id="yestLabel2">—</span> <span id="mYestInv">—</span></span>
+      </div>
+      <div class="energy-card" style="border-color: var(--red);">
+        <span class="energy-label" style="color: var(--red);">2ND FLR GRID</span>
+        <span class="dynamic-date" id="todayLabel3">—</span>
+        <span class="energy-val-today" id="mTodayFloor">—</span>
+        <span class="energy-val-yest"><span id="yestLabel3">—</span> <span id="mYestFloor">—</span></span>
+      </div>
+      <div class="energy-card" style="border-color: var(--red);">
+        <span class="energy-label" style="color: var(--red);">TOTAL GRID</span>
+        <span class="dynamic-date" id="todayLabel4">—</span>
+        <span class="energy-val-today" id="mTodayGrid">—</span>
+        <span class="energy-val-yest"><span id="yestLabel4">—</span> <span id="mYestGrid">—</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Weather Modal -->
+<div class="modal-overlay" id="weatherModal">
+  <div class="modal-content" style="border-color: var(--gold); box-shadow: 0 0 30px #ffc24730;">
+    <div class="modal-header">
+      <div class="modal-title" style="color: var(--gold);">WEATHER FORECAST</div>
+      <button class="modal-close" onclick="closeWeatherModal()">✕</button>
+    </div>
+    <div class="energy-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">TEMP</span>
+        <span class="energy-val-today" style="color: #fff;" id="wTemp">—</span>
+        <span class="energy-val-yest">Feels: <span id="wFeels">—</span></span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">WIND</span>
+        <span class="energy-val-today" style="color: #fff;" id="wWind">—</span>
+        <span class="energy-val-yest" id="wWindDir">—</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">RAIN</span>
+        <span class="energy-val-today" style="color: #fff;" id="wRain">—</span>
+        <span class="energy-val-yest">Chance</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">IRR NOW</span>
+        <span class="energy-val-today" style="color: var(--cyan);" id="wIrrNow">—</span>
+        <span class="energy-val-yest">W/m²</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">IRR NEXT HR</span>
+        <span class="energy-val-today" style="color: var(--cyan);" id="wIrrNext">—</span>
+        <span class="energy-val-yest">W/m²</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold);">
+        <span class="energy-label" style="color: var(--gold);">CLOUD NEXT</span>
+        <span class="energy-val-today" style="color: #fff;" id="wCloudNext">—</span>
+        <span class="energy-val-yest">%</span>
+      </div>
+      <div class="energy-card" style="border-color: var(--gold); grid-column: span 3;">
+        <span class="energy-label" style="color: var(--gold);">SUNRISE / SUNSET</span>
+        <span class="energy-val-today" style="color: #ffda83;" id="wSun">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GITHUB_API_URL = 'https://api.github.com/repos/Paulpacs/solar-mobile/contents/live_data.json';
+const HISTORY_API_URL = 'https://api.github.com/repos/Paulpacs/solar-mobile/contents/history.json';
+const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=9.312421&longitude=123.292598&current=temperature_2m,apparent_temperature,precipitation_probability,cloud_cover,wind_speed_10m,wind_direction_10m,shortwave_radiation&hourly=shortwave_radiation,cloud_cover&daily=sunrise,sunset&timezone=Asia%2FManila';
+
+const history = { pv: [], inv: [], grid: [] };
+const MAX_POINTS = 21;
+
+/* ---------- CLOCK ---------- */
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+}
+setInterval(tick, 1000); tick();
+
+/* ---------- ARC GAUGE HELPER ---------- */
+function setArc(arcId, frac) {
+  const el = document.getElementById(arcId);
+  if (!el) return;
+  const f = Math.max(0, Math.min(1, frac));
+  el.style.strokeDashoffset = 198 - (198 * f);
+}
+
+/* ---------- MODAL FUNCTIONS ---------- */
+function openEnergyModal() { 
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const options = { month: 'short', day: 'numeric' };
+  const todayStr = today.toLocaleDateString('en-US', options).toUpperCase() + ':';
+  const yestStr = yesterday.toLocaleDateString('en-US', options).toUpperCase() + ':';
+  document.getElementById('todayLabel1').textContent = todayStr;
+  document.getElementById('todayLabel2').textContent = todayStr;
+  document.getElementById('todayLabel3').textContent = todayStr;
+  document.getElementById('todayLabel4').textContent = todayStr;
+  document.getElementById('yestLabel1').textContent = yestStr;
+  document.getElementById('yestLabel2').textContent = yestStr;
+  document.getElementById('yestLabel3').textContent = yestStr;
+  document.getElementById('yestLabel4').textContent = yestStr;
+  document.getElementById('energyModal').classList.add('active'); 
+}
+function closeEnergyModal() { document.getElementById('energyModal').classList.remove('active'); }
+
+function openWeatherModal() { document.getElementById('weatherModal').classList.add('active'); }
+function closeWeatherModal() { document.getElementById('weatherModal').classList.remove('active'); }
+
+function openPvModal() { 
+  const pvPowerStr = document.getElementById('pvpower').textContent;
+  const pvVoltStr = document.getElementById('pvvoltage').textContent;
+  const estPvStr = document.getElementById('expectedPv').textContent;
+  const cloudStr = document.getElementById('cloudCover').textContent;
+  const rainStr = document.getElementById('wRain').textContent; 
+
+  const pvPower = parseFloat(pvPowerStr) || 0;
+  const pvVolt = parseFloat(pvVoltStr) || 0;
+  const estPv = parseFloat(estPvStr) || 0;
+  const cloud = parseFloat(cloudStr) || 0;
+  const rain = parseFloat(rainStr) || 0;
+
+  document.getElementById('modalPvPower').textContent = (pvPowerStr === '—' ? '0' : pvPowerStr) + ' W';
+  document.getElementById('modalPvVoltage').textContent = (pvVoltStr === '—' ? '0' : pvVoltStr) + ' V';
+
+  const capacityPct = Math.round((pvPower / 1785) * 100) || 0;
+  document.getElementById('modalPvUsage').textContent = capacityPct + '%';
+
+  let perfPct = 0;
+  if (estPv > 0) { perfPct = Math.round((pvPower / estPv) * 100); }
+  document.getElementById('modalPvPerf').textContent = perfPct + '%';
+
+  const expEl = document.getElementById('modalPvExplanation');
+  if (estPv === 0) {
+    expEl.innerHTML = `Solar generation is currently offline (nighttime or heavy overcast).`;
+    expEl.style.color = '#6b7280';
+  } else if (perfPct > 100) {
+    expEl.innerHTML = `Excellent! Panel output is <strong>exceeding</strong> weather estimates (likely due to cloud edge effects).`;
+    expEl.style.color = 'var(--cyan)';
+  } else if (perfPct >= 85) {
+    expEl.innerHTML = `Performance is optimal. Clear skies are allowing maximum solar generation.`;
+    expEl.style.color = 'var(--green)';
+  } else if (perfPct >= 50) {
+    expEl.innerHTML = `Output is moderately reduced. Cloud cover is at <strong>${cloud}%</strong>, limiting solar harvest.`;
+    expEl.style.color = 'var(--gold)';
+  } else {
+    expEl.innerHTML = `Output is heavily reduced. Cloud cover (<strong>${cloud}%</strong>) and a <strong>${rain}%</strong> chance of rain are blocking the sun.`;
+    expEl.style.color = 'var(--red)';
+  }
+
+  const mpptEl = document.getElementById('modalMpptStatus');
+  if (pvVolt === 0) {
+    mpptEl.textContent = 'off, no';
+    mpptEl.style.color = 'var(--off-gray)';
+  } else if (pvVolt < 120) {
+    mpptEl.textContent = 'receiving';
+    mpptEl.style.color = 'var(--green)';
+  } else {
+    mpptEl.textContent = 'rejecting';
+    mpptEl.style.color = 'var(--red)';
+  }
+  document.getElementById('pvModal').classList.add('active'); 
+}
+function closePvModal() { document.getElementById('pvModal').classList.remove('active'); }
+
+function openAcModal() {
+  const acCard = document.getElementById('acCard');
+  const acModalContent = document.getElementById('acModalContent');
+  const acModalTitle = document.getElementById('acModalTitle');
+  const statusCard = document.getElementById('acModalStatusCard');
+  const statusLabel = document.getElementById('acModalStatusLabel');
+  const statusValue = document.getElementById('acModalStatusValue');
+  const powerCard = document.getElementById('acModalPowerCard');
+  const powerLabel = document.getElementById('acModalPowerLabel');
+  const powerValue = document.getElementById('acModalPowerValue');
+  const header = document.getElementById('acModalHeader');
+
+  const tempCard = document.getElementById('acModalTempCard');
+  const tempLabel = document.getElementById('acModalTempLabel');
+  const humCard = document.getElementById('acModalHumCard');
+  const humLabel = document.getElementById('acModalHumLabel');
+
+  const isInv = acCard.classList.contains('inv-mode');
+  const isGrid = acCard.classList.contains('grid-mode');
+  const isOff = !isInv && !isGrid;
+
+  let themeColor = 'var(--off-gray)';
+  let themeGlow = '#d1d5db30';
+  if (isInv) { themeColor = 'var(--green)'; themeGlow = '#4cffb060'; }
+  if (isGrid) { themeColor = 'var(--red)'; themeGlow = '#ff2a2a60'; }
+
+  acModalContent.style.borderColor = themeColor;
+  acModalContent.style.boxShadow = '0 0 30px ' + themeGlow;
+  acModalTitle.style.color = themeColor;
+  header.style.borderBottomColor = themeColor;
+
+  statusCard.style.borderColor = themeColor;
+  statusLabel.style.color = themeColor;
+  powerCard.style.borderColor = themeColor;
+  powerLabel.style.color = themeColor;
+  tempCard.style.borderColor = themeColor;
+  tempLabel.style.color = themeColor;
+  humCard.style.borderColor = themeColor;
+  humLabel.style.color = themeColor;
+
+  if (isOff) {
+    statusValue.textContent = 'OFF';
+    statusValue.style.color = themeColor;
+    powerValue.textContent = 'None';
+    powerValue.style.color = '#6b7280';
+  } else {
+    statusValue.textContent = 'ON';
+    if (isInv) {
+      statusValue.style.color = 'var(--green)';
+      powerValue.textContent = 'Solar';
+      powerValue.style.color = 'var(--green)';
+    } else {
+      statusValue.style.color = 'var(--red)';
+      powerValue.textContent = 'Grid';
+      powerValue.style.color = 'var(--red)';
+    }
+  }
+  document.getElementById('acModal').classList.add('active');
+}
+function closeAcModal() { document.getElementById('acModal').classList.remove('active'); }
+
+function openInvModal() {
+  const invPowerStr = document.getElementById('invpower').textContent;
+  const pvPowerStr = document.getElementById('pvpower').textContent;
+  const pvVoltStr = document.getElementById('pvvoltage').textContent;
+
+  const invPower = parseFloat(invPowerStr) || 0;
+  const pvPower = parseFloat(pvPowerStr) || 0;
+  const pvVolt = parseFloat(pvVoltStr) || 0;
+
+  document.getElementById('modalInvPower').textContent = (invPowerStr === '—' ? '0' : invPowerStr) + ' W';
+
+  const loadPct = Math.round((invPower / 6500) * 100) || 0;
+  const pvCapacityPct = Math.round((pvPower / 8000) * 100) || 0;
+
+  document.getElementById('modalInvLoadPct').textContent = loadPct + '%';
+  document.getElementById('modalInvCapacity').textContent = loadPct + '%';
+  document.getElementById('modalInvPvCapacity').textContent = pvCapacityPct + '%';
+
+  const mpptEl = document.getElementById('modalInvMpptStatus');
+  mpptEl.textContent = (pvVoltStr === '—' ? '0' : pvVoltStr) + ' V';
+  
+  if (pvVolt >= 60 && pvVolt <= 500) {
+    mpptEl.style.color = 'var(--green)';
+  } else {
+    mpptEl.style.color = 'var(--red)';
+  }
+  document.getElementById('invModal').classList.add('active');
+}
+function closeInvModal() { document.getElementById('invModal').classList.remove('active'); }
+
+function openBattModal() {
+  const battVoltStr = document.getElementById('battery').textContent;
+  const battSocStr = document.getElementById('soc').textContent;
+  const invPowerStr = document.getElementById('invpower').textContent;
+  const pvPowerStr = document.getElementById('pvpower').textContent;
+
+  const battVolt = parseFloat(battVoltStr) || 0;
+  const battSoc = parseFloat(battSocStr) || 0;
+  const invPower = parseFloat(invPowerStr) || 0;
+  const pvPower = parseFloat(pvPowerStr) || 0;
+
+  document.getElementById('modalBattVolt').textContent = (battVoltStr === '—' ? '0' : battVoltStr) + ' V';
+  document.getElementById('modalBattSoc').textContent = (battSocStr === '—' ? '0' : battSocStr) + ' %';
+
+  const currentEl = document.getElementById('modalBattCurrent');
+  const flowEl = document.getElementById('modalBattFlow');
+  const statusText = document.getElementById('modalBattStatusText');
+  const timeText = document.getElementById('modalBattTimeText');
+
+  const parasiticLoad = invPower > 0 ? 100 : 0;
+  const totalLoad = invPower + parasiticLoad;
+  const diff = pvPower - totalLoad;
+
+  const totalCapacityAh = 36; 
+  const currentAh = (battSoc / 100) * totalCapacityAh;
+
+  if (Math.abs(diff) < 10) {
+    currentEl.textContent = '0 A';
+    currentEl.style.color = 'var(--off-gray)';
+    flowEl.textContent = 'Idle';
+    flowEl.style.color = 'var(--off-gray)';
+    statusText.innerHTML = invPower > 0 
+      ? `Inverter is ON. Total load: <strong>${Math.round(totalLoad)}W</strong> (Includes 100W parasitic). Battery is floating.`
+      : `Inverter is OFF. Battery is idle.`;
+    timeText.innerHTML = `—`;
+  } else if (diff > 0) {
+    const chargeAmps = diff / battVolt;
+    currentEl.textContent = '+' + chargeAmps.toFixed(1) + ' A';
+    currentEl.style.color = 'var(--green)';
+    flowEl.textContent = `Charging ${Math.round(diff)}W`;
+    flowEl.style.color = 'var(--green)';
+    statusText.innerHTML = `Inverter is ON. Total load: <strong>${Math.round(totalLoad)}W</strong> (Includes 100W parasitic). Battery is charging at <strong>${Math.round(diff)}W</strong>.`;
+    if (chargeAmps > 0) {
+      const hrs = (totalCapacityAh - currentAh) / chargeAmps;
+      timeText.innerHTML = `Estimated time to full: <strong>${hrs.toFixed(1)} hours</strong>.`;
+    } else { timeText.innerHTML = `—`; }
+  } else {
+    const dischargeAmps = Math.abs(diff) / battVolt;
+    currentEl.textContent = '-' + dischargeAmps.toFixed(1) + ' A';
+    currentEl.style.color = 'var(--red)';
+    flowEl.textContent = `Discharging ${Math.round(Math.abs(diff))}W`;
+    flowEl.style.color = 'var(--red)';
+    statusText.innerHTML = `Inverter is ON. Total load: <strong>${Math.round(totalLoad)}W</strong> (Includes 100W parasitic). Battery is discharging at <strong>${Math.round(Math.abs(diff))}W</strong>.`;
+    if (dischargeAmps > 0) {
+      const hrs = currentAh / dischargeAmps;
+      timeText.innerHTML = `Estimated time to empty: <strong>${hrs.toFixed(1)} hours</strong>.`;
+    } else { timeText.innerHTML = `—`; }
+  }
+  document.getElementById('battModal').classList.add('active');
+}
+function closeBattModal() { document.getElementById('battModal').classList.remove('active'); }
+
+function openGridModal() {
+  const totalGridStr = document.getElementById('totalgrid').textContent;
+  const floorGridStr = document.getElementById('floorgrid').textContent;
+  const gridVoltStr = document.getElementById('gridvoltage').textContent;
+  const invPowerStr = document.getElementById('invpower').textContent;
+
+  const totalGrid = parseFloat(totalGridStr) || 0;
+  const floorGrid = parseFloat(floorGridStr) || 0;
+  const gridVolt = parseFloat(gridVoltStr) || 0;
+  const invPower = parseFloat(invPowerStr) || 0;
+
+  document.getElementById('modalGridTotal').textContent = (totalGridStr === '—' ? '0' : totalGridStr) + ' W';
+  document.getElementById('modalGridFloor2').textContent = (floorGridStr === '—' ? '0' : floorGridStr) + ' W';
+  
+  const floor1 = Math.max(0, totalGrid - floorGrid);
+  document.getElementById('modalGridFloor1').textContent = floor1 + ' W';
+
+  const voltEl = document.getElementById('modalGridVolt');
+  voltEl.textContent = (gridVoltStr === '—' ? '0' : gridVoltStr) + ' V';
+  if (gridVolt >= 210 && gridVolt <= 240) {
+    voltEl.style.color = 'var(--green)';
+  } else {
+    voltEl.style.color = 'var(--red)';
+  }
+
+  const statusText = document.getElementById('modalGridStatusText');
+  const offsetText = document.getElementById('modalGridOffsetText');
+
+  if (totalGrid > 0) {
+    statusText.innerHTML = `The grid is supplying <strong>${Math.round(totalGrid)}W</strong> to the house.`;
+    statusText.style.color = '#eaf7ff';
+  } else {
+    statusText.innerHTML = `Grid is on standby. No power drawn from the utility.`;
+    statusText.style.color = 'var(--green)';
+  }
+
+  if (invPower > 0) {
+    offsetText.innerHTML = `Solar is offsetting the 2nd Floor by <strong>${Math.round(invPower)}W</strong>.`;
+    offsetText.style.color = '#eaf7ff';
+  } else {
+    offsetText.innerHTML = `Solar is currently inactive.`;
+    offsetText.style.color = '#a6d6f2';
+  }
+  document.getElementById('gridModal').classList.add('active');
+}
+function closeGridModal() { document.getElementById('gridModal').classList.remove('active'); }
+
+/* ---------- WEATHER ---------- */
+async function fetchWeather() {
+  try {
+    const res = await fetch(WEATHER_API_URL);
+    const w = await res.json();
+
+    const now = new Date();
+    const currentHourStr = now.getFullYear() + '-' + 
+      String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(now.getDate()).padStart(2, '0') + 'T' + 
+      String(now.getHours()).padStart(2, '0') + ':00';
+      
+    let currentIndex = w.hourly.time.indexOf(currentHourStr);
+    if (currentIndex === -1) currentIndex = 8;
+    const nextIndex = currentIndex + 1;
+
+    const deg = w.current.wind_direction_10m;
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const windDirText = dirs[Math.round(deg / 45) % 8];
+
+    document.getElementById('wTemp').textContent = w.current.temperature_2m + '°C';
+    document.getElementById('wFeels').textContent = w.current.apparent_temperature + '°C';
+    document.getElementById('wWind').textContent = w.current.wind_speed_10m + ' km/h';
+    document.getElementById('wWindDir').textContent = windDirText + ' (' + deg + '°)';
+    document.getElementById('wRain').textContent = w.current.precipitation_probability + '%';
+    
+    document.getElementById('wIrrNow').textContent = w.current.shortwave_radiation;
+    document.getElementById('wIrrNext').textContent = w.hourly.shortwave_radiation[nextIndex];
+    document.getElementById('wCloudNext').textContent = w.hourly.cloud_cover[nextIndex];
+    
+    document.getElementById('wSun').textContent = w.daily.sunrise[0].split('T')[1] + ' / ' + w.daily.sunset[0].split('T')[1];
+  } catch (e) {
+    console.error('Weather fetch failed:', e);
+  }
+}
+
+/* ---------- DATA FETCHING ---------- */
+function num(v){ 
+  if(v===null||v===undefined||v===''||String(v).toLowerCase()==='nan') return null; 
+  const n=Number(v); 
+  return Number.isFinite(n)?n:null; 
+}
+
+function show(id, v, dec, unit='') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = v === null ? '—' : v.toFixed(dec) + (unit ? ' '+unit : '');
+}
+
+function setDeviceStatus(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const strVal = String(val).toUpperCase();
+  if (strVal === 'YES' || strVal === '1') { el.textContent = 'ONLINE'; el.classList.add('on'); el.classList.remove('off'); }
+  else if (strVal === 'NO' || strVal === '0') { el.textContent = 'OFFLINE'; el.classList.remove('on'); el.classList.add('off'); }
+  else { el.textContent = '—'; el.classList.remove('on', 'off'); }
+}
+
+function drawCombinedChart() {
+  const canvas = document.getElementById('chartAll');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width) return;
+  
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  ctx.clearRect(0, 0, w, h);
+  
+  const pad = 4, plotH = h - 8, plotW = w - 8;
+  
+  ctx.strokeStyle = 'rgba(126,177,216,.14)';
+  ctx.lineWidth = 1;
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+
+  for (let i = 0; i <= 4; i++) {
+    const y = pad + plotH * i / 4;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    if (i > 0 && i < 4) {
+      const labelValue = (4 - i) * 500;
+      ctx.fillStyle = '#03132a'; 
+      ctx.fillText(labelValue, 2, y - 1); 
+      ctx.fillStyle = '#6b7280'; 
+      ctx.fillText(labelValue, 2, y - 1);
+    }
+  }
+
+  const series = [
+    { key: 'pv',   color: '#30e5ff', fill: 'rgba(48,229,255,.08)' },
+    { key: 'grid', color: '#ff2a2a', fill: 'rgba(255,42,42,.08)' },
+    { key: 'inv',  color: '#4cffb0', fill: 'rgba(76,255,176,.08)' }
+  ];
+
+  const max = 2000;
+  let hasData = false;
+
+  series.forEach(s => {
+    const data = history[s.key];
+    if (!data || !data.length) return;
+    hasData = true;
+
+    const pts = data.map((v, i) => ({
+      x: pad + (data.length === 1 ? plotW / 2 : i * plotW / (MAX_POINTS - 1)),
+      y: pad + plotH - (Math.min(max, Math.max(0, v)) / max) * plotH
+    }));
+
+    if (pts.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, h - pad);
+      pts.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(pts[pts.length - 1].x, h - pad);
+      ctx.closePath();
+      ctx.fillStyle = s.fill;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.shadowColor = s.color;
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    const last = pts[pts.length - 1];
+    ctx.beginPath();
+    ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = s.color;
+    ctx.fill();
+  });
+
+  if (!hasData) {
+    ctx.fillStyle = '#6d91b1';
+    ctx.font = '10px system-ui';
+    ctx.fillText('Waiting…', 8, h / 2 + 3);
+  }
+}
+
+function recordSample(key,value){
+  const n=num(value);if(n===null)return;
+  const a=history[key];
+  a.push(n);
+  if(a.length>MAX_POINTS)a.shift();
+  drawCombinedChart();
+}
+
+async function fetchHistory() {
+  try {
+    const res = await fetch(HISTORY_API_URL + '?t=' + new Date().getTime());
+    const apiData = await res.json();
+    if (!apiData.content) { console.warn('History fetch failed.'); return; }
+    const decodedContent = atob(apiData.content.replace(/\s/g, ''));
+    const data = JSON.parse(decodedContent);
+
+    if (data.pv && Array.isArray(data.pv)) history.pv = data.pv.map(Number).filter(n => !isNaN(n));
+    if (data.inv && Array.isArray(data.inv)) history.inv = data.inv.map(Number).filter(n => !isNaN(n));
+    if (data.grid && Array.isArray(data.grid)) history.grid = data.grid.map(Number).filter(n => !isNaN(n));
+    drawCombinedChart();
+  } catch (e) {
+    console.error('History fetch failed:', e);
+  }
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch(GITHUB_API_URL + '?t=' + new Date().getTime());
+    const apiData = await res.json();
+    if (!apiData.content) { console.warn('Data fetch failed.'); return; }
+    const decodedContent = atob(apiData.content.replace(/\s/g, ''));
+    const data = JSON.parse(decodedContent);
+    if (!data.updated_at) return;
+
+    const pvPower = num(data.pv_power);
+    const invPower = num(data.inverter_power);
+    const totalGrid = num(data.total_grid);
+    const floorGrid = num(data.floor_grid);
+    const irr = num(data.irradiance);
+    const cloud = num(data.cloud_cover);
+    const dhtTemp = num(data.dht_temp);
+    const dhtHum = num(data.dht_hum);
+    const gridVolt = num(data.grid_voltage);
+
+    // Main Gauges
+    show('pvpower', pvPower, 0);
+    show('invpower', invPower, 0);
+    show('totalgrid', totalGrid, 0);
+    show('battery', num(data.battery_voltage), 2);
+
+    // Arcs
+    setArc('pvArc', pvPower / 2000);
+    setArc('invArc', invPower / 2000);
+    setArc('gridArc', totalGrid / 2000);
+    setArc('battArc', (num(data.battery_voltage) || 0) / 60); // assuming 60V max
+
+    // Small boxes
+    document.getElementById('expectedPv').textContent = irr !== null ? Math.round((irr / 1000) * 1785) : '—';
+    document.getElementById('pvvoltage').textContent = num(data.pv_voltage) !== null ? num(data.pv_voltage).toFixed(1) : '—';
+    document.getElementById('soc').textContent = num(data.battery_soc) !== null ? Math.round(num(data.battery_soc)) : '—';
+    document.getElementById('cloudCover').textContent = cloud !== null ? Math.round(cloud) : '—';
+    document.getElementById('dhtTemp').textContent = dhtTemp !== null ? dhtTemp.toFixed(1) : '—';
+    document.getElementById('dhtHum').textContent = dhtHum !== null ? Math.round(dhtHum) : '—';
+    document.getElementById('gridvoltage').textContent = gridVolt !== null ? gridVolt.toFixed(1) : '—';
+
+    // Horizontal Bars
+    const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
+    document.getElementById('floor1').textContent = Math.round(floor1) + ' W';
+    document.getElementById('floorgrid').textContent = Math.round(floorGrid || 0) + ' W';
+    document.getElementById('floor1Bar').style.width = Math.min(100, (floor1 / 2000) * 100) + '%';
+    document.getElementById('floor2Bar').style.width = Math.min(100, (floorGrid / 2000) * 100) + '%';
+
+    // Battery Amps
+    const totalLoad = (invPower||0) + ((invPower||0) > 0 ? 100 : 0);
+    const diff = (pvPower||0) - totalLoad;
+    let amps = 0;
+    if (Math.abs(diff) > 10) amps = diff / (num(data.battery_voltage) || 48);
+    document.getElementById('battAmpsLabel').textContent = (amps > 0 ? '+' : '') + amps.toFixed(1) + ' A';
+    document.getElementById('battAmpsBar').style.width = Math.min(100, (Math.abs(amps) / 50) * 100) + '%';
+    document.getElementById('battAmpsBar').style.background = amps > 0 ? '#a6ff70' : (amps < 0 ? '#ff4d4d' : '#888');
+
+    // Device LEDs
+    setDeviceStatus('led129', data.esp129_online);
+    setDeviceStatus('led124', data.esp124_online);
+    setDeviceStatus('led100', data.meter100_online);
+
+    // Hidden fields for modals
+    document.getElementById('mTodayPv').textContent = num(data.today_pv_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mYestPv').textContent = num(data.yesterday_pv_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mTodayInv').textContent = num(data.today_inverter_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mYestInv').textContent = num(data.yesterday_inverter_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mTodayFloor').textContent = num(data.today_floor_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mYestFloor').textContent = num(data.yesterday_floor_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mTodayGrid').textContent = num(data.today_grid_kwh)?.toFixed(2) + ' kWh' || '—';
+    document.getElementById('mYestGrid').textContent = num(data.yesterday_grid_kwh)?.toFixed(2) + ' kWh' || '—';
+
+    // AC Modal Logic
+    const acCard = document.getElementById('acCard');
+    const isAcGrid = (floorGrid !== null && floorGrid > 1000);
+    const isAcInverter = (invPower !== null && invPower > 1200);
+    if (isAcInverter) acCard.className = 'readout ac-read inv-mode';
+    else if (isAcGrid) acCard.className = 'readout ac-read grid-mode';
+    else acCard.className = 'readout ac-read';
+
+    // Chart
+    if (pvPower !== null) recordSample('pv', pvPower);
+    if (invPower !== null) recordSample('inv', invPower);
+    if (totalGrid !== null) recordSample('grid', totalGrid);
+
+  } catch (e) {
+    console.error('Fetch failed:', e);
+  }
+}
+
+fetchHistory();
+fetchData();
+fetchWeather();
+setInterval(fetchData, 60000);
+setInterval(fetchWeather, 600000);
+window.addEventListener('resize', drawCombinedChart);
+setTimeout(drawCombinedChart, 500);
+</script>
+</body>
+</html>
