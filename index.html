@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#050807">
-<title>Paulpacs Solar — Crammed Submarine</title>
+<title>Paulpacs Solar — Overload Submarine</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -123,15 +123,17 @@
   .gauge-main .track { fill: none; stroke: rgba(107,255,184,.08); stroke-linecap: round; }
   .gauge-main .value-arc { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1); filter: drop-shadow(0 0 3px currentColor); }
   
-  .gauge-main .val { font-size: 16px; font-weight: 900; line-height: 1; z-index: 2; text-shadow: 0 0 6px currentColor; }
+  .gauge-main .val { font-size: 18px; font-weight: 900; line-height: 1; z-index: 2; text-shadow: 0 0 6px currentColor; }
   .gauge-main .unit { font-size: 6px; opacity: .8; margin-top: 1px; z-index: 2; letter-spacing: 1px; }
   .gauge-main .sub { font-size: 5px; opacity: .6; margin-top: 1px; z-index: 2; text-transform: uppercase; }
 
-  /* LEVEL METERS (Vertical) */
-  .vmeter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; }
+  /* ULTRA DENSE MIXED GRID */
+  .mixed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
+
+  /* Vertical Level Meters */
   .vmeter { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .vmeter-track {
-    width: 100%; height: 50px; background: #050807; border: 1px solid var(--bezel-light);
+    width: 100%; height: 45px; background: #050807; border: 1px solid var(--bezel-light);
     border-radius: 2px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
     background-image: repeating-linear-gradient(0deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,0.05) calc(10% - 1px), rgba(255,255,255,0.05) 10%);
     overflow: hidden;
@@ -142,18 +144,18 @@
   }
   .vmeter-label { font-size: 5px; font-weight: bold; color: var(--text-dim); text-transform: uppercase; text-align: center; white-space: nowrap; }
 
-  /* HORIZONTAL METERS */
+  /* Horizontal Meters */
   .h-meter { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
   .h-meter-label { display: flex; justify-content: space-between; font-size: 6px; font-weight: bold; color: var(--text-dim); letter-spacing: 1px; }
   .h-meter-track {
-    height: 6px; background: #050807; border: 1px solid var(--bezel-light);
+    height: 8px; background: #050807; border: 1px solid var(--bezel-light);
     border-radius: 2px; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
     background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,0.05) calc(10% - 1px), rgba(255,255,255,0.05) 10%);
   }
   .h-meter-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; transition: width 0.6s ease; box-shadow: inset 0 0 4px rgba(255,255,255,0.4); }
 
-  /* LED INDICATORS */
-  .led-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 4px; }
+  /* LED Indicators */
+  .led-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 4px; }
   .led {
     background: #0a0f0c; border: 1px solid #222; border-radius: 2px;
     padding: 2px; text-align: center; font-size: 5px; font-weight: bold; letter-spacing: 0.5px;
@@ -162,21 +164,23 @@
   .led.on { background: rgba(107,255,184,0.15); border-color: var(--sonar); color: var(--sonar); box-shadow: 0 0 4px rgba(107,255,184,0.4); }
   .led.off { background: rgba(255,77,77,0.15); border-color: var(--red); color: var(--red); box-shadow: 0 0 4px rgba(255,77,77,0.4); }
 
-  /* MINI GAUGES (Dense Area) */
-  .dense-mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 4px; }
-  .mini-gauge {
-    background: #000; border: 1px solid #1a2420; border-radius: 3px;
-    padding: 3px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
-    height: 35px;
+  /* Mini Analog Dials (for percentages) */
+  .mini-dial {
+    position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
+    background: #000; border: 1px solid var(--bezel-light);
+    box-shadow: inset 0 0 8px #000;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
   }
-  .mini-gauge .lbl { font-size: 5px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
-  .mini-gauge .val { font-size: 10px; font-weight: 900; font-family: monospace; }
+  .mini-dial .tick { position: absolute; width: 1px; height: 4px; background: #555; top: 2px; left: 50%; transform-origin: 50% 20px; }
+  .mini-dial .needle { position: absolute; width: 2px; height: 16px; background: var(--cyan); bottom: 50%; left: 50%; transform-origin: bottom center; transform: rotate(-135deg); transition: transform 0.6s; }
+  .mini-dial .pivot { position: absolute; width: 4px; height: 4px; background: #888; border-radius: 50%; }
   
-  /* TOGGLE SWITCHES */
+  /* Toggle Switches */
   .switch-bank { display: flex; gap: 4px; margin-top: 4px; }
   .toggle-switch {
     flex: 1; background: #111; border: 1px solid #333; border-radius: 2px;
-    padding: 2px; display: flex; align-items: center; justify-content: center; gap: 4px;
+    padding: 2px; display: flex; flex-direction: column; align-items: center; gap: 2px;
   }
   .switch-handle {
     width: 8px; height: 12px; background: linear-gradient(180deg, #555 0%, #222 100%);
@@ -192,7 +196,7 @@
 
   /* CHART PANEL */
   .chart-wrapper {
-    position: relative; height: 100px; width: 100%;
+    position: relative; height: 90px; width: 100%;
     border: 1px solid rgba(107,255,184,.2); border-radius: 3px;
     background: linear-gradient(rgba(107,255,184,.04) 1px, transparent 1px) 0 0 / 100% 25%, radial-gradient(ellipse at 50% 50%, #061a10 0%, #000 80%);
     box-shadow: inset 0 0 10px rgba(0,0,0,.9);
@@ -200,7 +204,7 @@
   }
   .chart-wrapper canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 
-  /* HIDDEN ELEMENTS */
+  /* HIDDEN */
   .hidden { display: none !important; }
 </style>
 </head>
@@ -208,7 +212,7 @@
 
 <div class="header">
   <h1>PAULPACS</h1>
-  <p>CRAMMED SUBMARINE CONSOLE</p>
+  <p>DENSE OVERLOAD CONSOLE</p>
   <div class="clock" id="clock">--:--:--</div>
 </div>
 
@@ -258,12 +262,12 @@
     </div>
   </div>
 
-  <!-- ULTRA DENSE METERS PANEL -->
+  <!-- ULTRA DENSE PANEL -->
   <div class="panel">
-    <div class="panel-title"><span class="dot" style="background:var(--cyan);color:var(--cyan)"></span>SYSTEM METERS & LEVELS</div>
+    <div class="panel-title"><span class="dot" style="background:var(--cyan);color:var(--cyan)"></span>SYSTEM LEVELS & INDICATORS</div>
     
-    <!-- Vertical Level Meters -->
-    <div class="vmeter-grid">
+    <div class="mixed-grid">
+      <!-- Vertical Level Meters -->
       <div class="vmeter">
         <div class="vmeter-track"><div class="vmeter-fill" id="vBarSoc" style="background:#a6ff70;"></div></div>
         <div class="vmeter-label">SOC</div>
@@ -280,37 +284,17 @@
         <div class="vmeter-track"><div class="vmeter-fill" id="vBarAmps" style="background:var(--amber);"></div></div>
         <div class="vmeter-label">AMPS</div>
       </div>
-    </div>
-
-    <!-- Mini Digital Readouts -->
-    <div class="dense-mini-grid">
-      <div class="mini-gauge">
-        <div class="lbl">EST PV</div><div class="val" style="color:var(--cyan);" id="expectedPv">—</div>
+      <div class="vmeter">
+        <div class="vmeter-track"><div class="vmeter-fill" id="vBarCloud" style="background:#aaa;"></div></div>
+        <div class="vmeter-label">CLOUD</div>
       </div>
-      <div class="mini-gauge">
-        <div class="lbl">PV PERF</div><div class="val" style="color:var(--cyan);" id="pvPerf">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">CLOUD</div><div class="val" style="color:var(--amber);" id="cloudCover">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">ROOM T</div><div class="val" style="color:var(--amber);" id="dhtTemp">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">ROOM H</div><div class="val" style="color:var(--amber);" id="dhtHum">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">BATT AMPS</div><div class="val" style="color:#a6ff70;" id="battAmpsDisplay">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">PV CAP</div><div class="val" style="color:var(--cyan);" id="pvCapacity">—</div>
-      </div>
-      <div class="mini-gauge">
-        <div class="lbl">INV CAP</div><div class="val" style="color:#6bffb8;" id="invCapacity">—</div>
+      <div class="vmeter">
+        <div class="vmeter-track"><div class="vmeter-fill" id="vBarTemp" style="background:var(--amber);"></div></div>
+        <div class="vmeter-label">ROOM T</div>
       </div>
     </div>
 
-    <!-- Horizontal Meter Bars -->
+    <!-- Horizontal Meters -->
     <div class="h-meter">
       <div class="h-meter-label"><span>1ST FLOOR LOAD</span><span id="floor1">— W</span></div>
       <div class="h-meter-track"><div class="h-meter-fill" id="floor1Bar" style="background:var(--cyan);"></div></div>
@@ -320,45 +304,30 @@
       <div class="h-meter-track"><div class="h-meter-fill" id="floor2Bar" style="background:var(--amber);"></div></div>
     </div>
 
-    <!-- Device Status & Switches -->
+    <!-- Toggle Switches (Energy Stats) -->
+    <div class="switch-bank">
+      <div class="toggle-switch">
+        <div class="switch-handle on"></div>
+        <div class="switch-label" id="switchPvLabel">PV: —</div>
+      </div>
+      <div class="toggle-switch">
+        <div class="switch-handle on"></div>
+        <div class="switch-label" id="switchInvLabel">INV: —</div>
+      </div>
+      <div class="toggle-switch">
+        <div class="switch-handle on"></div>
+        <div class="switch-label" id="switchGridLabel">GRID: —</div>
+      </div>
+    </div>
+
+    <!-- LED Array (Devices + MPPT + AC) -->
     <div class="led-grid">
       <div class="led" id="led129">ESP129</div>
       <div class="led" id="led124">ESP124</div>
       <div class="led" id="led100">METER</div>
+      <div class="led" id="ledMppt">MPPT</div>
       <div class="led" id="ledAc">AC STATE</div>
       <div class="led" id="ledAcSrc">AC SRC</div>
-      <div class="led" id="ledMppt">MPPT</div>
-    </div>
-  </div>
-
-  <!-- ENERGY METERS PANEL -->
-  <div class="panel">
-    <div class="panel-title"><span class="dot" style="background:var(--brass);color:var(--brass)"></span>ENERGY METERS</div>
-    <div class="switch-bank">
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label">PV TODAY</div>
-      </div>
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label">INV TODAY</div>
-      </div>
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label">GRID TODAY</div>
-      </div>
-    </div>
-    <div class="h-meter" style="margin-top: 4px;">
-      <div class="h-meter-label"><span>DAILY PV (kWh)</span><span id="mTodayPv">—</span></div>
-      <div class="h-meter-track"><div class="h-meter-fill" id="pvDailyBar" style="background:var(--cyan);"></div></div>
-    </div>
-    <div class="h-meter">
-      <div class="h-meter-label"><span>DAILY INV (kWh)</span><span id="mTodayInv">—</span></div>
-      <div class="h-meter-track"><div class="h-meter-fill" id="invDailyBar" style="background:#6bffb8;"></div></div>
-    </div>
-    <div class="h-meter">
-      <div class="h-meter-label"><span>DAILY GRID (kWh)</span><span id="mTodayGrid">—</span></div>
-      <div class="h-meter-track"><div class="h-meter-fill" id="gridDailyBar" style="background:var(--red);"></div></div>
     </div>
   </div>
 
@@ -372,7 +341,7 @@
 
 </div>
 
-<!-- HIDDEN ELEMENTS FOR JS COMPATIBILITY -->
+<!-- HIDDEN ELEMENTS -->
 <div class="hidden" id="wRain">—</div>
 <div class="hidden" id="wTemp">—</div>
 <div class="hidden" id="wFeels">—</div>
@@ -450,12 +419,6 @@ function num(v){
   return Number.isFinite(n)?n:null; 
 }
 
-function show(id, v, dec, unit='') {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = v === null ? '—' : v.toFixed(dec) + (unit ? ' '+unit : '');
-}
-
 function setDeviceStatus(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -484,9 +447,6 @@ function drawCombinedChart() {
   
   ctx.strokeStyle = 'rgba(126,177,216,.14)';
   ctx.lineWidth = 1;
-  ctx.font = '8px system-ui';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'bottom';
 
   for (let i = 0; i <= 4; i++) {
     const y = pad + plotH * i / 4;
@@ -595,10 +555,10 @@ async function fetchData() {
     const pvVolt = num(data.pv_voltage);
 
     // Main Gauges
-    show('pvpower', pvPower, 0);
-    show('invpower', invPower, 0);
-    show('totalgrid', totalGrid, 0);
-    show('battery', battVolt, 2);
+    document.getElementById('pvpower').textContent = pvPower !== null ? Math.round(pvPower) : '—';
+    document.getElementById('invpower').textContent = invPower !== null ? Math.round(invPower) : '—';
+    document.getElementById('totalgrid').textContent = totalGrid !== null ? Math.round(totalGrid) : '—';
+    document.getElementById('battery').textContent = battVolt !== null ? battVolt.toFixed(2) : '—';
 
     // Main Arcs
     setArc('pvArc', pvPower / 2000);
@@ -614,18 +574,8 @@ async function fetchData() {
     const amps = Math.abs(diff) > 10 ? diff / (battVolt || 48) : 0;
     document.getElementById('vBarAmps').style.height = Math.min(100, (Math.abs(amps) / 50) * 100) + '%'; // 50A max
     document.getElementById('vBarAmps').style.background = amps > 0 ? '#a6ff70' : (amps < 0 ? '#ff4d4d' : '#888');
-
-    // Mini Digital Readouts
-    const expectedPvVal = irr !== null ? (irr / 1000) * 1785 : 0;
-    document.getElementById('expectedPv').textContent = irr !== null ? Math.round(expectedPvVal) : '—';
-    const pvPerfVal = expectedPvVal > 0 ? Math.round((pvPower / expectedPvVal) * 100) : 0;
-    document.getElementById('pvPerf').textContent = pvPerfVal + '%';
-    document.getElementById('cloudCover').textContent = cloud !== null ? Math.round(cloud) : '—';
-    document.getElementById('dhtTemp').textContent = dhtTemp !== null ? dhtTemp.toFixed(1) : '—';
-    document.getElementById('dhtHum').textContent = dhtHum !== null ? Math.round(dhtHum) : '—';
-    document.getElementById('battAmpsDisplay').textContent = (amps > 0 ? '+' : '') + amps.toFixed(1);
-    document.getElementById('pvCapacity').textContent = Math.round((pvPower / 1785) * 100) + '%';
-    document.getElementById('invCapacity').textContent = Math.round((invPower / 6500) * 100) + '%';
+    document.getElementById('vBarCloud').style.height = Math.min(100, cloud || 0) + '%';
+    document.getElementById('vBarTemp').style.height = Math.min(100, ((dhtTemp || 0) / 50) * 100) + '%'; // 50C max
 
     // Horizontal Bars
     const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
@@ -633,6 +583,14 @@ async function fetchData() {
     document.getElementById('floorgrid').textContent = Math.round(floorGrid || 0) + ' W';
     document.getElementById('floor1Bar').style.width = Math.min(100, (floor1 / 2000) * 100) + '%';
     document.getElementById('floor2Bar').style.width = Math.min(100, (floorGrid / 2000) * 100) + '%';
+
+    // Toggle Switches (Energy)
+    const todayPv = num(data.today_pv_kwh) || 0;
+    const todayInv = num(data.today_inverter_kwh) || 0;
+    const todayGrid = num(data.today_grid_kwh) || 0;
+    document.getElementById('switchPvLabel').textContent = todayPv.toFixed(1) + ' kWh';
+    document.getElementById('switchInvLabel').textContent = todayInv.toFixed(1) + ' kWh';
+    document.getElementById('switchGridLabel').textContent = todayGrid.toFixed(1) + ' kWh';
 
     // LEDs
     setDeviceStatus('led129', data.esp129_online);
@@ -654,19 +612,6 @@ async function fetchData() {
     if (pvVolt === 0) { ledMppt.className = 'led off'; ledMppt.textContent = 'MPPT OFF'; }
     else if (pvVolt < 120) { ledMppt.className = 'led on'; ledMppt.textContent = 'MPPT OK'; }
     else { ledMppt.className = 'led off'; ledMppt.textContent = 'MPPT ERR'; }
-
-    // Energy Meters
-    const todayPv = num(data.today_pv_kwh) || 0;
-    const todayInv = num(data.today_inverter_kwh) || 0;
-    const todayGrid = num(data.today_grid_kwh) || 0;
-    document.getElementById('mTodayPv').textContent = todayPv.toFixed(2);
-    document.getElementById('mTodayInv').textContent = todayInv.toFixed(2);
-    document.getElementById('mTodayGrid').textContent = todayGrid.toFixed(2);
-    
-    // Scale bars based on a 10kWh daily max
-    document.getElementById('pvDailyBar').style.width = Math.min(100, (todayPv / 10) * 100) + '%';
-    document.getElementById('invDailyBar').style.width = Math.min(100, (todayInv / 10) * 100) + '%';
-    document.getElementById('gridDailyBar').style.width = Math.min(100, (todayGrid / 10) * 100) + '%';
 
     // Chart
     if (pvPower !== null) recordSample('pv', pvPower);
