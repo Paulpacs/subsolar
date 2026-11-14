@@ -16,7 +16,7 @@
     --bezel-dark: #555555;
     --glass: rgba(15, 20, 18, 0.9);
     
-    /* Vintage Cockpit Colors (Muted / Grimy) */
+    /* Vintage Cockpit Colors */
     --lime: #7acc50;      
     --amber: #d99c3b;     
     --red: #cc4444;       
@@ -26,8 +26,8 @@
     --text-dim: #6b7a73;
     
     /* Darkened Horizon Colors */
-    --horizon-top: #4a3317;    /* Dark amber/brown */
-    --horizon-bottom: #1c383d; /* Dark murky teal */
+    --horizon-top: #4a3317;    
+    --horizon-bottom: #1c383d; 
     
     /* LED Screen Colors */
     --led-bg: #0a0f0c;
@@ -144,14 +144,28 @@
     border-radius: 50%; z-index: 4; border: 1px solid #000;
   }
 
-  /* Digital Readout */
+  /* =========================================
+     DIGITAL READOUT (INCREASED 100% & BOLD)
+     ========================================= */
   .gauge-digital {
-    position: absolute; bottom: 15%; width: 100%; text-align: center;
-    z-index: 2; background: rgba(0,0,0,0.8); padding: 1px 0;
+    position: absolute; bottom: 12%; width: 100%; text-align: center;
+    z-index: 2; background: rgba(0,0,0,0.8); padding: 2px 0;
     border-top: 1px solid #333; border-bottom: 1px solid #333;
   }
-  .gauge-digital .num { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: var(--lime); text-shadow: 0 0 5px rgba(122,204,80,0.5); }
-  .gauge-digital .lbl { font-size: 6px; color: var(--warning-yellow); letter-spacing: 1px; }
+  .gauge-digital .num { 
+    font-family: 'Courier New', monospace; 
+    font-size: 28px; /* Increased from 14px */
+    font-weight: 900; /* Extra bold */
+    color: var(--lime); 
+    text-shadow: 0 0 8px rgba(122,204,80,0.8); 
+    line-height: 1.1;
+  }
+  .gauge-digital .lbl { 
+    font-size: 6px; 
+    color: var(--warning-yellow); 
+    letter-spacing: 1px; 
+    font-weight: bold;
+  }
 
   /* SMALL SUB-GAUGES GRID */
   .sub-gauge-grid {
@@ -171,9 +185,14 @@
     overflow: hidden;
   }
   .mini-gauge .needle { height: 18px; }
-  .mini-gauge .gauge-digital { bottom: 12%; }
-  .mini-gauge .gauge-digital .num { font-size: 9px; }
-  .mini-gauge .gauge-digital .lbl { font-size: 5px; }
+  
+  /* Increase mini gauge numbers 100% */
+  .mini-gauge .gauge-digital { bottom: 8%; padding: 1px 0; }
+  .mini-gauge .gauge-digital .num { 
+    font-size: 18px; /* Increased from 9px */
+    font-weight: 900; 
+  }
+  .mini-gauge .gauge-digital .lbl { font-size: 5px; font-weight: bold; }
 
   /* =========================================
      HORIZON GAUGE (ATTITUDE INDICATOR)
@@ -270,7 +289,7 @@
     display: flex; justify-content: space-between; align-items: center;
     font-family: 'Courier New', monospace; font-size: 9px; 
     color: var(--led-green); text-shadow: 0 0 4px var(--led-green);
-    margin-bottom: 2px; letter-spacing: 1px;
+    margin-bottom: 2px; letter-spacing: 1px; font-weight: bold;
   }
   .led-row span:first-child { color: var(--text-dim); text-shadow: none; font-size: 7px; }
 
@@ -565,7 +584,6 @@ function setNeedle(needleId, val, max) {
 }
 
 // HORIZON GAUGE HELPER
-// Moves the ball up or down. Top is 2nd floor (amber), Bottom is 1st floor (cyan).
 function setHorizon(valTop, valBottom) {
   const ball = document.getElementById('horizonBall');
   if (!ball) return;
@@ -576,13 +594,8 @@ function setHorizon(valTop, valBottom) {
     return;
   }
 
-  // Calculate the percentage of the top (2nd floor) load
   const topPct = valTop / total;
-  
-  // We multiply by 100 because the ball is 200% height.
   const shiftY = (0.5 - topPct) * 100; 
-  
-  // Cap the movement so we can still see some color
   const cappedY = Math.max(-40, Math.min(40, shiftY));
   
   ball.style.transform = `translateY(${cappedY}%)`;
@@ -762,7 +775,7 @@ async function fetchData() {
 
     // Horizon Gauge (Floors)
     const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
-    setHorizon(floorGrid || 0, floor1); // Top is 2nd floor, Bottom is 1st floor
+    setHorizon(floorGrid || 0, floor1);
 
     // LED Screen (Daily Totals)
     const todayPv = num(data.today_pv_kwh) || 0;
