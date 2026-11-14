@@ -130,19 +130,47 @@
   /* ULTRA DENSE MIXED GRID */
   .mixed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
 
-  /* Vertical Level Meters */
-  .vmeter { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .vmeter-track {
-    width: 100%; height: 45px; background: #050807; border: 1px solid var(--bezel-light);
-    border-radius: 2px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
-    background-image: repeating-linear-gradient(0deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,0.05) calc(10% - 1px), rgba(255,255,255,0.05) 10%);
+  /* MINI ANALOG GAUGES (Replaced Vertical Meters) */
+  .mini-gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  
+  .mini-dial {
+    position: relative; width: 100%; aspect-ratio: 1; max-height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, #111 0%, #000 80%);
+    border: 1px solid var(--bezel-light);
+    box-shadow: inset 0 0 6px #000;
+    display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .vmeter-fill {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 0%;
-    transition: height 0.6s ease; box-shadow: inset 0 0 4px rgba(255,255,255,0.4);
+  
+  /* Circular tick marks inside the dial */
+  .mini-dial .tick-ring {
+    position: absolute; inset: 3px; border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.1);
   }
-  .vmeter-label { font-size: 5px; font-weight: bold; color: var(--text-dim); text-transform: uppercase; text-align: center; white-space: nowrap; }
+  
+  .mini-dial .needle {
+    position: absolute; width: 1.5px; height: 14px;
+    background: linear-gradient(to top, var(--red) 0%, var(--red) 70%, #fff 100%);
+    bottom: 50%; left: 50%; transform-origin: bottom center;
+    transform: rotate(-135deg); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2; border-radius: 1px;
+  }
+  .mini-dial .pivot {
+    position: absolute; width: 3px; height: 3px; background: #ccc;
+    border-radius: 50%; z-index: 3;
+  }
+  .mini-gauge-label {
+    font-size: 5px; font-weight: bold; color: var(--text-dim);
+    text-transform: uppercase; text-align: center; white-space: nowrap;
+  }
+  
+  /* The small digital text inside the mini dial */
+  .mini-dial .text {
+    position: absolute; bottom: 4px; width: 100%; text-align: center;
+    font-size: 6px; font-weight: 900; color: var(--sonar); z-index: 1;
+    text-shadow: 0 0 4px rgba(107,255,184,0.5);
+  }
 
   /* Horizontal Meters */
   .h-meter { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
@@ -164,18 +192,6 @@
   .led.on { background: rgba(107,255,184,0.15); border-color: var(--sonar); color: var(--sonar); box-shadow: 0 0 4px rgba(107,255,184,0.4); }
   .led.off { background: rgba(255,77,77,0.15); border-color: var(--red); color: var(--red); box-shadow: 0 0 4px rgba(255,77,77,0.4); }
 
-  /* Mini Analog Dials (for percentages) */
-  .mini-dial {
-    position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
-    background: #000; border: 1px solid var(--bezel-light);
-    box-shadow: inset 0 0 8px #000;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .mini-dial .tick { position: absolute; width: 1px; height: 4px; background: #555; top: 2px; left: 50%; transform-origin: 50% 20px; }
-  .mini-dial .needle { position: absolute; width: 2px; height: 16px; background: var(--cyan); bottom: 50%; left: 50%; transform-origin: bottom center; transform: rotate(-135deg); transition: transform 0.6s; }
-  .mini-dial .pivot { position: absolute; width: 4px; height: 4px; background: #888; border-radius: 50%; }
-  
   /* Toggle Switches */
   .switch-bank { display: flex; gap: 4px; margin-top: 4px; }
   .toggle-switch {
@@ -266,31 +282,61 @@
   <div class="panel">
     <div class="panel-title"><span class="dot" style="background:var(--cyan);color:var(--cyan)"></span>SYSTEM LEVELS & INDICATORS</div>
     
+    <!-- 6 MINI ANALOG GAUGES -->
     <div class="mixed-grid">
-      <!-- Vertical Level Meters -->
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarSoc" style="background:#a6ff70;"></div></div>
-        <div class="vmeter-label">SOC</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needleSoc"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valSoc">0%</div>
+        </div>
+        <div class="mini-gauge-label">SOC</div>
       </div>
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarPvV" style="background:var(--cyan);"></div></div>
-        <div class="vmeter-label">PV VOLT</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needlePvV"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valPvV">0V</div>
+        </div>
+        <div class="mini-gauge-label">PV VOLT</div>
       </div>
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarGridV" style="background:var(--red);"></div></div>
-        <div class="vmeter-label">GRID V</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needleGridV"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valGridV">0V</div>
+        </div>
+        <div class="mini-gauge-label">GRID V</div>
       </div>
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarAmps" style="background:var(--amber);"></div></div>
-        <div class="vmeter-label">AMPS</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needleAmps"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valAmps">0A</div>
+        </div>
+        <div class="mini-gauge-label">AMPS</div>
       </div>
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarCloud" style="background:#aaa;"></div></div>
-        <div class="vmeter-label">CLOUD</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needleCloud"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valCloud">0%</div>
+        </div>
+        <div class="mini-gauge-label">CLOUD</div>
       </div>
-      <div class="vmeter">
-        <div class="vmeter-track"><div class="vmeter-fill" id="vBarTemp" style="background:var(--amber);"></div></div>
-        <div class="vmeter-label">ROOM T</div>
+      <div class="mini-gauge-wrap">
+        <div class="mini-dial">
+          <div class="tick-ring"></div>
+          <div class="needle" id="needleTemp"></div>
+          <div class="pivot"></div>
+          <div class="text" id="valTemp">0°C</div>
+        </div>
+        <div class="mini-gauge-label">ROOM T</div>
       </div>
     </div>
 
@@ -370,12 +416,24 @@ function tick() {
 }
 setInterval(tick, 1000); tick();
 
-/* ---------- ARC GAUGE HELPER ---------- */
+/* ---------- ARC & NEEDLE HELPERS ---------- */
 function setArc(arcId, frac) {
   const el = document.getElementById(arcId);
   if (!el) return;
   const f = Math.max(0, Math.min(1, frac));
   el.style.strokeDashoffset = 198 - (198 * f);
+}
+
+function setNeedle(needleId, textId, val, max, unit) {
+  const needle = document.getElementById(needleId);
+  const text = document.getElementById(textId);
+  if (!needle || !text) return;
+  
+  const frac = Math.max(0, Math.min(1, val / max));
+  const angle = -135 + (270 * frac);
+  needle.style.transform = `rotate(${angle}deg)`;
+  
+  if (text) text.textContent = val.toFixed(0) + unit;
 }
 
 /* ---------- WEATHER ---------- */
@@ -566,16 +624,16 @@ async function fetchData() {
     setArc('gridArc', totalGrid / 2000);
     setArc('battArc', battVolt / 60);
 
-    // Vertical Level Meters
-    document.getElementById('vBarSoc').style.height = Math.min(100, battSoc || 0) + '%';
-    document.getElementById('vBarPvV').style.height = Math.min(100, (pvVolt || 0) / 1.5) + '%'; // 150V max
-    document.getElementById('vBarGridV').style.height = Math.min(100, (gridVolt || 0) / 3) + '%'; // 300V max
+    // Mini Analog Needles (Replaced Vertical Bars)
     const diff = (pvPower||0) - ((invPower||0) + ((invPower||0) > 0 ? 100 : 0));
     const amps = Math.abs(diff) > 10 ? diff / (battVolt || 48) : 0;
-    document.getElementById('vBarAmps').style.height = Math.min(100, (Math.abs(amps) / 50) * 100) + '%'; // 50A max
-    document.getElementById('vBarAmps').style.background = amps > 0 ? '#a6ff70' : (amps < 0 ? '#ff4d4d' : '#888');
-    document.getElementById('vBarCloud').style.height = Math.min(100, cloud || 0) + '%';
-    document.getElementById('vBarTemp').style.height = Math.min(100, ((dhtTemp || 0) / 50) * 100) + '%'; // 50C max
+
+    setNeedle('needleSoc', 'valSoc', battSoc || 0, 100, '%');
+    setNeedle('needlePvV', 'valPvV', pvVolt || 0, 150, 'V');
+    setNeedle('needleGridV', 'valGridV', gridVolt || 0, 300, 'V');
+    setNeedle('needleAmps', 'valAmps', Math.abs(amps), 50, 'A');
+    setNeedle('needleCloud', 'valCloud', cloud || 0, 100, '%');
+    setNeedle('needleTemp', 'valTemp', dhtTemp || 0, 50, '°C');
 
     // Horizontal Bars
     const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
