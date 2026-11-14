@@ -16,7 +16,7 @@
     --bezel-dark: #555555;
     --glass: rgba(15, 20, 18, 0.9);
     
-    /* Vintage Cockpit Colors */
+    /* Vintage Cockpit Colors (Muted / Grimy) */
     --lime: #7acc50;      
     --amber: #d99c3b;     
     --red: #cc4444;       
@@ -24,6 +24,10 @@
     --white: #d1d8d6;     
     --warning-yellow: #d4b859;
     --text-dim: #6b7a73;
+    
+    /* Darkened Horizon Colors */
+    --horizon-top: #4a3317;    /* Dark amber/brown */
+    --horizon-bottom: #1c383d; /* Dark murky teal */
     
     /* LED Screen Colors */
     --led-bg: #0a0f0c;
@@ -193,8 +197,8 @@
     position: absolute; width: 200%; height: 200%;
     top: -50%; left: -50%;
     background: linear-gradient(to bottom, 
-      var(--amber) 0%, var(--amber) 50%, 
-      var(--cyan) 50%, var(--cyan) 100%);
+      var(--horizon-top) 0%, var(--horizon-top) 50%, 
+      var(--horizon-bottom) 50%, var(--horizon-bottom) 100%);
     transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
   }
@@ -211,10 +215,18 @@
     position: absolute; inset: 0; z-index: 3; pointer-events: none;
   }
   .horizon-reticle::before {
-    content: ''; position: absolute; top: 50%; left: 10%; width: 30%; height: 2px; background: #fff; transform: translateY(-50%); box-shadow: 0 0 4px #000;
+    content: ''; position: absolute; top: 50%; left: 10%; width: 30%; height: 2px; background: var(--white); transform: translateY(-50%); box-shadow: 0 0 4px #000; opacity: 0.7;
   }
   .horizon-reticle::after {
-    content: ''; position: absolute; top: 50%; right: 10%; width: 30%; height: 2px; background: #fff; transform: translateY(-50%); box-shadow: 0 0 4px #000;
+    content: ''; position: absolute; top: 50%; right: 10%; width: 30%; height: 2px; background: var(--white); transform: translateY(-50%); box-shadow: 0 0 4px #000; opacity: 0.7;
+  }
+
+  /* Dark glass overlay to mute the colors */
+  .horizon-glass {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    border-radius: 50%;
   }
 
   /* TOGGLE SWITCHES */
@@ -439,6 +451,7 @@
           <div class="horizon-ball" id="horizonBall"></div>
           <div class="horizon-line"></div>
           <div class="horizon-reticle"></div>
+          <div class="horizon-glass"></div>
         </div>
       </div>
 
@@ -559,7 +572,6 @@ function setHorizon(valTop, valBottom) {
 
   const total = valTop + valBottom;
   if (total === 0) {
-    // Default to level horizon if no power is being drawn
     ball.style.transform = 'translateY(0%)';
     return;
   }
@@ -567,9 +579,6 @@ function setHorizon(valTop, valBottom) {
   // Calculate the percentage of the top (2nd floor) load
   const topPct = valTop / total;
   
-  // If topPct is 0.5, translateY is 0 (horizon is in the middle)
-  // If topPct is 1.0 (all top), translateY goes up (negative value pushes it into view)
-  // If topPct is 0.0 (all bottom), translateY goes down.
   // We multiply by 100 because the ball is 200% height.
   const shiftY = (0.5 - topPct) * 100; 
   
