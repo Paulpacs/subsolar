@@ -4,390 +4,425 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#050807">
-<title>Paulpacs Solar — Overload Submarine</title>
+<title>Paulpacs Solar — Vintage Cockpit</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg: #050807;
-    --panel-bg: #111815;
-    --panel-light: #1a2420;
-    --bezel: #0a0f0c;
-    --bezel-light: #3d4a42;
-    --brass: #c9a227;
-    --brass-light: #e8c95a;
-    --sonar: #6bffb8;
-    --sonar-dim: #2a8a5c;
-    --red: #ff4d4d;
+    --metal-dark: #121212;
+    --metal-mid: #222222;
+    --metal-light: #333333;
+    --bezel-silver: #888888;
+    --bezel-dark: #555555;
+    --glass: rgba(15, 20, 18, 0.9);
+    --lime: #b4ff4d;
     --amber: #ffb84d;
-    --cyan: #30e5ff;
-    --text: #eafff5;
+    --red: #ff4d4d;
+    --cyan: #4dffff;
+    --white: #e8f0f5;
+    --warning-yellow: #e8c95a;
     --text-dim: #6a8a7a;
   }
 
   body {
-    background:
-      radial-gradient(ellipse at 50% 0%, #0d1411 0%, #000 75%),
-      repeating-linear-gradient(0deg, rgba(0,0,0,.4) 0px, rgba(0,0,0,.4) 1px, transparent 1px, transparent 3px);
+    /* Simulates a scratched, dirty metal panel */
+    background-color: #151515;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(40,40,40,0.6) 0%, rgba(0,0,0,1) 100%),
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px),
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.05"/></svg>');
     margin: 0; min-height: 100vh;
-    font-family: 'Courier New', ui-monospace, monospace;
-    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--white);
     -webkit-font-smoothing: antialiased;
-    padding-bottom: 10px;
+    padding: 4px;
     overflow-x: hidden;
   }
 
-  /* CRT scanline overlay */
-  body::after {
-    content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none;
-    background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
-  }
-
-  /* HEADER */
-  .header {
-    text-align: center; padding: 8px 10px 4px;
-    position: sticky; top: 0; z-index: 100;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 70%, transparent);
-    backdrop-filter: blur(4px);
-  }
-  .header h1 {
-    margin: 0; font-size: 16px; font-weight: 900; letter-spacing: 4px;
-    color: var(--brass-light);
-    text-shadow: 0 0 4px var(--brass), 0 0 12px rgba(201,162,39,.5);
-  }
-  .header p {
-    margin: 2px 0 0; font-size: 6px; color: var(--sonar);
-    letter-spacing: 2px; font-weight: bold;
-    text-shadow: 0 0 6px var(--sonar);
-  }
-  .clock {
-    margin-top: 4px; display: inline-block;
-    font-size: 9px; color: var(--sonar); letter-spacing: 1px;
-    font-weight: bold; font-variant-numeric: tabular-nums;
-    padding: 1px 8px;
-    border: 1px solid var(--sonar-dim);
-    border-radius: 3px;
-    background: rgba(0,20,10,.8);
-    box-shadow: inset 0 0 6px rgba(107,255,184,.15), 0 0 6px rgba(107,255,184,.2);
-  }
-
-  /* DASHBOARD LAYOUT */
-  .dashboard {
-    display: flex; flex-direction: column; gap: 6px;
-    padding: 4px; max-width: 600px; margin: 0 auto;
-  }
-
-  /* PANELS */
-  .panel {
+  /* COCKPIT LAYOUT */
+  .cockpit {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 4px;
     position: relative;
-    background: linear-gradient(160deg, var(--panel-light) 0%, var(--panel-bg) 40%, #050807 100%);
-    border: 1px solid var(--brass-dark);
-    border-radius: 6px;
-    padding: 6px 6px 4px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 3px 8px rgba(0,0,0,.6);
-  }
-  .panel::after {
-    content: ''; position: absolute; inset: 2px; border-radius: 4px;
-    border: 1px solid rgba(201,162,39,.15); pointer-events: none;
-  }
-  .panel::before {
-    content: ''; position: absolute; inset: 4px; border-radius: 5px; pointer-events: none;
-    background:
-      radial-gradient(circle at 5px 5px, #4a4a4a 1px, transparent 1.5px),
-      radial-gradient(circle at calc(100% - 5px) 5px, #4a4a4a 1px, transparent 1.5px),
-      radial-gradient(circle at 5px calc(100% - 5px), #4a4a4a 1px, transparent 1.5px),
-      radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), #4a4a4a 1px, transparent 1.5px);
-    opacity: .6;
   }
 
-  .panel-title {
-    font-size: 7px; font-weight: 900; letter-spacing: 2px;
-    text-transform: uppercase; margin-bottom: 4px;
-    color: var(--brass-light); display: flex; align-items: center; gap: 4px;
-    text-shadow: 0 0 4px rgba(201,162,39,.5);
+  /* YELLOW WARNING BRACKETS (Like the image) */
+  .warning-bracket {
+    position: absolute;
+    border: 1.5px solid var(--warning-yellow);
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0.7;
+    z-index: 1;
   }
-  .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; box-shadow: 0 0 4px currentColor; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+  .bracket-1 { top: 35%; left: 2%; width: 48%; height: 28%; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+  .bracket-2 { top: 35%; right: 2%; width: 48%; height: 28%; border-left: none; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+  .bracket-3 { top: 65%; left: 2%; width: 96%; height: 15%; }
 
-  /* MAIN GAUGES (2x2 Grid) */
-  .gauge-grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 4px; }
+  /* PANEL BASE */
+  .panel {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    border: 1px solid var(--bezel-dark);
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.8);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   
-  .gauge-main {
-    position: relative; aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 45%, #0a1812 0%, #000 75%);
-    box-shadow: inset 0 0 10px rgba(0,0,0,.9), 0 0 0 2px #0a0f0c, 0 0 0 3px var(--brass-dark), 0 0 0 4px rgba(201,162,39,.3);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  /* Tiny Screws on the panels */
+  .panel::before, .panel::after {
+    content: ''; position: absolute; width: 4px; height: 4px;
+    background: radial-gradient(circle at 30% 30%, #888, #222);
+    border-radius: 50%; box-shadow: 0 1px 1px #000;
   }
-  .gauge-main svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(135deg); }
-  .gauge-main .track { fill: none; stroke: rgba(107,255,184,.08); stroke-linecap: round; }
-  .gauge-main .value-arc { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1); filter: drop-shadow(0 0 3px currentColor); }
-  
-  .gauge-main .val { font-size: 18px; font-weight: 900; line-height: 1; z-index: 2; text-shadow: 0 0 6px currentColor; }
-  .gauge-main .unit { font-size: 6px; opacity: .8; margin-top: 1px; z-index: 2; letter-spacing: 1px; }
-  .gauge-main .sub { font-size: 5px; opacity: .6; margin-top: 1px; z-index: 2; text-transform: uppercase; }
+  .panel::before { top: 2px; left: 2px; }
+  .panel::after { bottom: 2px; right: 2px; }
 
-  /* ULTRA DENSE MIXED GRID */
-  .mixed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
+  .panel-label {
+    font-size: 7px; font-weight: bold; color: var(--warning-yellow);
+    letter-spacing: 1px; text-transform: uppercase;
+    background: #000; padding: 1px 4px; align-self: flex-start;
+    border-radius: 2px; border: 1px solid #333;
+  }
 
-  /* MINI ANALOG GAUGES (Replaced Vertical Meters) */
-  .mini-gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  
-  .mini-dial {
-    position: relative; width: 100%; aspect-ratio: 1; max-height: 48px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 40%, #111 0%, #000 80%);
-    border: 1px solid var(--bezel-light);
-    box-shadow: inset 0 0 6px #000;
-    display: flex; align-items: center; justify-content: center;
+  /* MAIN ANALOG GAUGE (Vintage Style) */
+  .gauge-container {
+    position: relative; width: 100%; aspect-ratio: 1;
+    margin-bottom: 4px;
+  }
+  .gauge-bezel {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: linear-gradient(135deg, #444, #111);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.2);
+    display: flex; justify-content: center; align-items: center;
+  }
+  .gauge-face {
+    position: relative; width: 88%; height: 88%; border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #111 0%, #000 80%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,1);
+    border: 1px solid #000;
     overflow: hidden;
   }
   
-  /* Circular tick marks inside the dial */
-  .mini-dial .tick-ring {
-    position: absolute; inset: 3px; border-radius: 50%;
-    border: 1px dashed rgba(255,255,255,0.1);
+  /* Ticks */
+  .gauge-ticks { position: absolute; inset: 0; border-radius: 50%; }
+  .tick {
+    position: absolute; top: 0; left: 50%; width: 1px; height: 5px;
+    background: var(--white); transform-origin: 50% 50px; /* Adjust based on size */
+    opacity: 0.6;
+  }
+  .tick.major { height: 8px; width: 2px; background: var(--warning-yellow); opacity: 1; }
+
+  /* Needle */
+  .needle {
+    position: absolute; bottom: 50%; left: 50%; width: 3px; height: 35px;
+    background: linear-gradient(to top, var(--amber) 0%, var(--amber) 80%, #fff 100%);
+    transform-origin: bottom center; transform: rotate(-135deg);
+    margin-left: -1.5px; z-index: 2;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .needle-pivot {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 8px; height: 8px; background: radial-gradient(circle, #999, #333);
+    border-radius: 50%; z-index: 3; border: 1px solid #000;
+  }
+
+  /* Digital Readout inside gauge */
+  .gauge-digital {
+    position: absolute; bottom: 20%; width: 100%; text-align: center;
+    z-index: 1; background: rgba(0,0,0,0.7); padding: 1px 0;
+    border-top: 1px solid #333; border-bottom: 1px solid #333;
+  }
+  .gauge-digital .num { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: var(--lime); text-shadow: 0 0 5px var(--lime); }
+  .gauge-digital .lbl { font-size: 6px; color: var(--warning-yellow); letter-spacing: 1px; }
+
+  /* SMALL SUB-GAUGES GRID */
+  .sub-gauge-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
   }
   
-  .mini-dial .needle {
-    position: absolute; width: 1.5px; height: 14px;
-    background: linear-gradient(to top, var(--red) 0%, var(--red) 70%, #fff 100%);
-    bottom: 50%; left: 50%; transform-origin: bottom center;
-    transform: rotate(-135deg); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2; border-radius: 1px;
+  .mini-gauge {
+    position: relative; width: 100%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #333, #111);
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8);
+    display: flex; justify-content: center; align-items: center;
   }
-  .mini-dial .pivot {
-    position: absolute; width: 3px; height: 3px; background: #ccc;
-    border-radius: 50%; z-index: 3;
+  .mini-gauge-face {
+    position: relative; width: 82%; height: 82%; border-radius: 50%;
+    background: #050505; border: 1px solid #000;
+    overflow: hidden;
   }
-  .mini-gauge-label {
-    font-size: 5px; font-weight: bold; color: var(--text-dim);
-    text-transform: uppercase; text-align: center; white-space: nowrap;
+  .mini-gauge .needle { height: 18px; }
+  .mini-gauge .gauge-digital { bottom: 12%; }
+  .mini-gauge .gauge-digital .num { font-size: 9px; }
+  .mini-gauge .gauge-digital .lbl { font-size: 5px; }
+
+  /* TOGGLE SWITCHES & INDICATORS */
+  .switch-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .switch-box {
+    display: flex; align-items: center; gap: 4px;
+    background: #000; padding: 2px 4px; border-radius: 3px; border: 1px solid #333;
   }
+  .switch-box .lbl { font-size: 6px; color: var(--text-dim); text-transform: uppercase; }
   
-  /* The small digital text inside the mini dial */
-  .mini-dial .text {
-    position: absolute; bottom: 4px; width: 100%; text-align: center;
-    font-size: 6px; font-weight: 900; color: var(--sonar); z-index: 1;
-    text-shadow: 0 0 4px rgba(107,255,184,0.5);
-  }
-
-  /* Horizontal Meters */
-  .h-meter { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
-  .h-meter-label { display: flex; justify-content: space-between; font-size: 6px; font-weight: bold; color: var(--text-dim); letter-spacing: 1px; }
-  .h-meter-track {
-    height: 8px; background: #050807; border: 1px solid var(--bezel-light);
-    border-radius: 2px; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
-    background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), rgba(255,255,255,0.05) calc(10% - 1px), rgba(255,255,255,0.05) 10%);
-  }
-  .h-meter-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; transition: width 0.6s ease; box-shadow: inset 0 0 4px rgba(255,255,255,0.4); }
-
-  /* LED Indicators */
-  .led-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 4px; }
-  .led {
-    background: #0a0f0c; border: 1px solid #222; border-radius: 2px;
-    padding: 2px; text-align: center; font-size: 5px; font-weight: bold; letter-spacing: 0.5px;
-    color: #444; transition: all 0.3s;
-  }
-  .led.on { background: rgba(107,255,184,0.15); border-color: var(--sonar); color: var(--sonar); box-shadow: 0 0 4px rgba(107,255,184,0.4); }
-  .led.off { background: rgba(255,77,77,0.15); border-color: var(--red); color: var(--red); box-shadow: 0 0 4px rgba(255,77,77,0.4); }
-
-  /* Toggle Switches */
-  .switch-bank { display: flex; gap: 4px; margin-top: 4px; }
-  .toggle-switch {
-    flex: 1; background: #111; border: 1px solid #333; border-radius: 2px;
-    padding: 2px; display: flex; flex-direction: column; align-items: center; gap: 2px;
-  }
-  .switch-handle {
-    width: 8px; height: 12px; background: linear-gradient(180deg, #555 0%, #222 100%);
-    border-radius: 4px; border: 1px solid #000; position: relative;
+  .toggle-handle {
+    width: 12px; height: 18px; background: linear-gradient(180deg, #555 0%, #222 100%);
+    border-radius: 2px; border: 1px solid #000; position: relative;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
   }
-  .switch-handle::after {
-    content: ''; position: absolute; top: 1px; left: 50%; transform: translateX(-50%);
-    width: 6px; height: 6px; border-radius: 50%; background: #888;
+  .toggle-handle::after {
+    content: ''; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%; background: #888;
   }
-  .switch-handle.on { transform: scaleY(-1); }
-  .switch-label { font-size: 5px; font-weight: bold; color: var(--text-dim); text-transform: uppercase; }
+  .toggle-handle.on { transform: scaleY(-1); }
+
+  .led {
+    width: 8px; height: 8px; border-radius: 50%; background: #333;
+    border: 1px solid #000; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  }
+  .led.green { background: var(--lime); box-shadow: 0 0 6px var(--lime); }
+  .led.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .led.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+  /* TEXT LABELS & WARNINGS */
+  .tech-label {
+    font-size: 6px; color: var(--white); text-transform: uppercase;
+    background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 1px;
+    display: inline-block; margin-bottom: 2px; letter-spacing: 0.5px;
+  }
+  .tech-label.warning { color: var(--red); border: 1px solid var(--red); }
 
   /* CHART PANEL */
-  .chart-wrapper {
-    position: relative; height: 90px; width: 100%;
-    border: 1px solid rgba(107,255,184,.2); border-radius: 3px;
-    background: linear-gradient(rgba(107,255,184,.04) 1px, transparent 1px) 0 0 / 100% 25%, radial-gradient(ellipse at 50% 50%, #061a10 0%, #000 80%);
-    box-shadow: inset 0 0 10px rgba(0,0,0,.9);
+  .chart-panel {
+    grid-column: 1 / -1; /* Spans full width */
+    height: 100px;
+    background: #050a08;
+    border: 2px solid #222;
+    border-radius: 4px;
+    box-shadow: inset 0 0 20px #000, 0 4px 8px rgba(0,0,0,0.8);
+    position: relative;
     overflow: hidden;
+    margin-top: 4px;
   }
-  .chart-wrapper canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+  .chart-panel::before {
+    content: 'ОСЦИЛЛОСКОП'; /* Oscilloscope in Russian */
+    position: absolute; top: 2px; left: 6px; font-size: 7px; color: var(--lime);
+    letter-spacing: 2px; z-index: 10;
+  }
+  .chart-canvas { width: 100%; height: 100%; }
 
   /* HIDDEN */
   .hidden { display: none !important; }
+
+  /* Animations */
+  @keyframes flicker {
+    0% { opacity: 1; }
+    5% { opacity: 0.8; }
+    10% { opacity: 1; }
+    100% { opacity: 1; }
+  }
+  .gauge-digital .num { animation: flicker 4s infinite; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>PAULPACS</h1>
-  <p>DENSE OVERLOAD CONSOLE</p>
-  <div class="clock" id="clock">--:--:--</div>
-</div>
+<div class="cockpit">
+  
+  <!-- Decorative warning brackets -->
+  <div class="warning-bracket bracket-1"></div>
+  <div class="warning-bracket bracket-2"></div>
+  <div class="warning-bracket bracket-3"></div>
 
-<div class="dashboard">
+  <!-- LEFT COLUMN (Engine / Generation) -->
+  <div style="display: flex; flex-direction: column; gap: 6px; z-index: 2;">
+    
+    <!-- MAIN GAUGE: PV POWER -->
+    <div class="panel">
+      <div class="panel-label">ГЕНЕРАЦИЯ (PV)</div>
+      <div class="gauge-container">
+        <div class="gauge-bezel">
+          <div class="gauge-face" id="facePv">
+            <div class="gauge-ticks" id="ticksPv"></div>
+            <div class="needle" id="needlePv"></div>
+            <div class="needle-pivot"></div>
+            <div class="gauge-digital">
+              <div class="num" id="pvPower">0</div>
+              <div class="lbl">WATTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tech-label">СОЛНЕЧНАЯ ПАНЕЛЬ</div>
+    </div>
 
-  <!-- MAIN GAUGES (2x2) -->
-  <div class="gauge-grid-main">
-    <!-- PV POWER -->
-    <div class="gauge-main">
-      <svg viewBox="0 0 100 100">
-        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
-        <circle class="value-arc" id="pvArc" cx="50" cy="50" r="42" stroke="#30e5ff" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
-      </svg>
-      <div class="val" style="color:#30e5ff;" id="pvpower">—</div>
-      <div class="unit">WATTS</div>
-      <div class="sub">PV POWER</div>
+    <!-- MAIN GAUGE: BATTERY VOLTAGE -->
+    <div class="panel">
+      <div class="panel-label">АККУМУЛЯТОР (BATT)</div>
+      <div class="gauge-container">
+        <div class="gauge-bezel">
+          <div class="gauge-face" id="faceBatt">
+            <div class="gauge-ticks" id="ticksBatt"></div>
+            <div class="needle" id="needleBatt"></div>
+            <div class="needle-pivot"></div>
+            <div class="gauge-digital">
+              <div class="num" id="battVolt">0.0</div>
+              <div class="lbl">VOLTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="switch-row">
+        <div class="switch-box"><div class="lbl">SYS</div><div class="toggle-handle on"></div></div>
+        <div class="switch-box"><div class="lbl">CHG</div><div class="toggle-handle" id="swCharge"></div></div>
+      </div>
     </div>
-    <!-- INVERTER POWER -->
-    <div class="gauge-main">
-      <svg viewBox="0 0 100 100">
-        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
-        <circle class="value-arc" id="invArc" cx="50" cy="50" r="42" stroke="#6bffb8" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
-      </svg>
-      <div class="val" style="color:#6bffb8;" id="invpower">—</div>
-      <div class="unit">WATTS</div>
-      <div class="sub">INVERTER</div>
+
+    <!-- SUB-GAUGES: PV VOLT & CLOUD -->
+    <div class="panel">
+      <div class="sub-gauge-grid">
+        <div class="mini-gauge">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksPvV"></div>
+            <div class="needle" id="needlePvV"></div>
+            <div class="gauge-digital"><div class="num" id="pvVolt">0</div><div class="lbl">PV VOLT</div></div>
+          </div>
+        </div>
+        <div class="mini-gauge">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksCloud"></div>
+            <div class="needle" id="needleCloud"></div>
+            <div class="gauge-digital"><div class="num" id="cloudCover">0</div><div class="lbl">CLOUD %</div></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- TOTAL GRID -->
-    <div class="gauge-main">
-      <svg viewBox="0 0 100 100">
-        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
-        <circle class="value-arc" id="gridArc" cx="50" cy="50" r="42" stroke="#ff4d4d" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
-      </svg>
-      <div class="val" style="color:#ff4d4d;" id="totalgrid">—</div>
-      <div class="unit">WATTS</div>
-      <div class="sub">GRID TOTAL</div>
-    </div>
-    <!-- BATTERY VOLTAGE -->
-    <div class="gauge-main">
-      <svg viewBox="0 0 100 100">
-        <circle class="track" cx="50" cy="50" r="42" stroke-width="6" stroke-dasharray="198 264"></circle>
-        <circle class="value-arc" id="battArc" cx="50" cy="50" r="42" stroke="#a6ff70" stroke-width="6" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
-      </svg>
-      <div class="val" style="color:#a6ff70;" id="battery">—</div>
-      <div class="unit">VOLTS</div>
-      <div class="sub">BATTERY</div>
-    </div>
+
   </div>
 
-  <!-- ULTRA DENSE PANEL -->
-  <div class="panel">
-    <div class="panel-title"><span class="dot" style="background:var(--cyan);color:var(--cyan)"></span>SYSTEM LEVELS & INDICATORS</div>
+  <!-- RIGHT COLUMN (Load / Grid) -->
+  <div style="display: flex; flex-direction: column; gap: 6px; z-index: 2;">
+
+    <!-- MAIN GAUGE: INVERTER LOAD -->
+    <div class="panel">
+      <div class="panel-label">ИНВЕРТОР (LOAD)</div>
+      <div class="gauge-container">
+        <div class="gauge-bezel">
+          <div class="gauge-face" id="faceInv">
+            <div class="gauge-ticks" id="ticksInv"></div>
+            <div class="needle" id="needleInv"></div>
+            <div class="needle-pivot"></div>
+            <div class="gauge-digital">
+              <div class="num" id="invPower">0</div>
+              <div class="lbl">WATTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tech-label">НАГРУЗКА</div>
+    </div>
+
+    <!-- MAIN GAUGE: GRID POWER -->
+    <div class="panel">
+      <div class="panel-label">СЕТЬ (GRID)</div>
+      <div class="gauge-container">
+        <div class="gauge-bezel">
+          <div class="gauge-face" id="faceGrid">
+            <div class="gauge-ticks" id="ticksGrid"></div>
+            <div class="needle" id="needleGrid"></div>
+            <div class="needle-pivot"></div>
+            <div class="gauge-digital">
+              <div class="num" id="gridPower">0</div>
+              <div class="lbl">WATTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="switch-row">
+        <div class="switch-box"><div class="lbl">GRID</div><div class="toggle-handle" id="swGrid"></div></div>
+        <div class="led" id="ledGridStatus"></div>
+      </div>
+    </div>
+
+    <!-- SUB-GAUGES: AMPS & TEMP -->
+    <div class="panel">
+      <div class="sub-gauge-grid">
+        <div class="mini-gauge">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksAmps"></div>
+            <div class="needle" id="needleAmps"></div>
+            <div class="gauge-digital"><div class="num" id="battAmps">0.0</div><div class="lbl">AMPS</div></div>
+          </div>
+        </div>
+        <div class="mini-gauge">
+          <div class="mini-gauge-face">
+            <div class="gauge-ticks" id="ticksTemp"></div>
+            <div class="needle" id="needleTemp"></div>
+            <div class="gauge-digital"><div class="num" id="dhtTemp">0</div><div class="lbl">ROOM T</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM PANEL: FLOORS & ENERGY -->
+  <div class="panel" style="grid-column: 1 / -1; display: flex; gap: 8px; z-index: 2;">
     
-    <!-- 6 MINI ANALOG GAUGES -->
-    <div class="mixed-grid">
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needleSoc"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valSoc">0%</div>
+    <!-- Floor Loads -->
+    <div style="flex: 1;">
+      <div class="tech-label">ПОТРЕБЛЕНИЕ ЭТАЖЕЙ</div>
+      <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+        
+        <div class="switch-box" style="width: 100%; justify-content: space-between;">
+          <div class="lbl">1ST FLOOR</div>
+          <div class="num" style="font-size: 9px; color: var(--cyan);" id="floor1">0 W</div>
         </div>
-        <div class="mini-gauge-label">SOC</div>
-      </div>
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needlePvV"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valPvV">0V</div>
+        
+        <div class="switch-box" style="width: 100%; justify-content: space-between;">
+          <div class="lbl">2ND FLOOR</div>
+          <div class="num" style="font-size: 9px; color: var(--amber);" id="floorGrid">0 W</div>
         </div>
-        <div class="mini-gauge-label">PV VOLT</div>
-      </div>
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needleGridV"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valGridV">0V</div>
-        </div>
-        <div class="mini-gauge-label">GRID V</div>
-      </div>
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needleAmps"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valAmps">0A</div>
-        </div>
-        <div class="mini-gauge-label">AMPS</div>
-      </div>
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needleCloud"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valCloud">0%</div>
-        </div>
-        <div class="mini-gauge-label">CLOUD</div>
-      </div>
-      <div class="mini-gauge-wrap">
-        <div class="mini-dial">
-          <div class="tick-ring"></div>
-          <div class="needle" id="needleTemp"></div>
-          <div class="pivot"></div>
-          <div class="text" id="valTemp">0°C</div>
-        </div>
-        <div class="mini-gauge-label">ROOM T</div>
+
       </div>
     </div>
 
-    <!-- Horizontal Meters -->
-    <div class="h-meter">
-      <div class="h-meter-label"><span>1ST FLOOR LOAD</span><span id="floor1">— W</span></div>
-      <div class="h-meter-track"><div class="h-meter-fill" id="floor1Bar" style="background:var(--cyan);"></div></div>
-    </div>
-    <div class="h-meter">
-      <div class="h-meter-label"><span>2ND FLOOR LOAD</span><span id="floorgrid">— W</span></div>
-      <div class="h-meter-track"><div class="h-meter-fill" id="floor2Bar" style="background:var(--amber);"></div></div>
-    </div>
+    <!-- Energy Today -->
+    <div style="flex: 1;">
+      <div class="tech-label">ЭНЕРГИЯ СЕГОДНЯ</div>
+      <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+        
+        <div class="switch-box" style="width: 100%; justify-content: space-between;">
+          <div class="lbl">PV GEN</div>
+          <div class="num" style="font-size: 9px; color: var(--lime);" id="todayPv">0.0</div>
+        </div>
+        
+        <div class="switch-box" style="width: 100%; justify-content: space-between;">
+          <div class="lbl">INV LOAD</div>
+          <div class="num" style="font-size: 9px; color: var(--lime);" id="todayInv">0.0</div>
+        </div>
 
-    <!-- Toggle Switches (Energy Stats) -->
-    <div class="switch-bank">
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label" id="switchPvLabel">PV: —</div>
-      </div>
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label" id="switchInvLabel">INV: —</div>
-      </div>
-      <div class="toggle-switch">
-        <div class="switch-handle on"></div>
-        <div class="switch-label" id="switchGridLabel">GRID: —</div>
       </div>
     </div>
 
-    <!-- LED Array (Devices + MPPT + AC) -->
-    <div class="led-grid">
-      <div class="led" id="led129">ESP129</div>
-      <div class="led" id="led124">ESP124</div>
-      <div class="led" id="led100">METER</div>
-      <div class="led" id="ledMppt">MPPT</div>
-      <div class="led" id="ledAc">AC STATE</div>
-      <div class="led" id="ledAcSrc">AC SRC</div>
-    </div>
   </div>
 
   <!-- CHART PANEL -->
-  <div class="panel">
-    <div class="panel-title" style="margin-bottom:2px;"><span class="dot" style="background:var(--sonar);color:var(--sonar)"></span>POWER HISTORY</div>
-    <div class="chart-wrapper">
-      <canvas id="chartAll"></canvas>
-    </div>
+  <div class="chart-panel">
+    <canvas id="chartAll" class="chart-canvas"></canvas>
   </div>
 
 </div>
 
-<!-- HIDDEN ELEMENTS -->
+<!-- HIDDEN ELEMENTS FOR API COMPATIBILITY -->
 <div class="hidden" id="wRain">—</div>
 <div class="hidden" id="wTemp">—</div>
 <div class="hidden" id="wFeels">—</div>
@@ -397,9 +432,20 @@
 <div class="hidden" id="wIrrNext">—</div>
 <div class="hidden" id="wCloudNext">—</div>
 <div class="hidden" id="wSun">—</div>
+<div class="hidden" id="mTodayPv">—</div>
 <div class="hidden" id="mYestPv">—</div>
+<div class="hidden" id="mTodayInv">—</div>
 <div class="hidden" id="mYestInv">—</div>
+<div class="hidden" id="mTodayGrid">—</div>
 <div class="hidden" id="mYestGrid">—</div>
+<div class="hidden" id="led129">—</div>
+<div class="hidden" id="led124">—</div>
+<div class="hidden" id="led100">—</div>
+<div class="hidden" id="ledMppt">—</div>
+<div class="hidden" id="ledAc">—</div>
+<div class="hidden" id="ledAcSrc">—</div>
+<div class="hidden" id="gridVolt">—</div>
+<div class="hidden" id="battSoc">—</div>
 
 <script>
 const GITHUB_API_URL = 'https://api.github.com/repos/Paulpacs/solar-mobile/contents/live_data.json';
@@ -411,29 +457,43 @@ const MAX_POINTS = 21;
 
 /* ---------- CLOCK ---------- */
 function tick() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+  // Removed clock from header, but keeping the function in case we want it.
 }
 setInterval(tick, 1000); tick();
 
-/* ---------- ARC & NEEDLE HELPERS ---------- */
-function setArc(arcId, frac) {
-  const el = document.getElementById(arcId);
-  if (!el) return;
-  const f = Math.max(0, Math.min(1, frac));
-  el.style.strokeDashoffset = 198 - (198 * f);
+/* ---------- GAUGE GENERATOR ---------- */
+// Generates ticks around a dial
+function buildTicks(containerId, count, majorEvery, radius = 50) {
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  container.innerHTML = ''; // Clear existing
+  for (let i = 0; i <= count; i++) {
+    const tick = document.createElement('div');
+    tick.className = 'tick' + (i % majorEvery === 0 ? ' major' : '');
+    const angle = -135 + (270 * (i / count));
+    tick.style.transform = `rotate(${angle}deg) translateY(-${radius}px)`;
+    container.appendChild(tick);
+  }
 }
 
-function setNeedle(needleId, textId, val, max, unit) {
+// Build ticks for all gauges
+buildTicks('ticksPv', 20, 4, 50);
+buildTicks('ticksBatt', 20, 4, 50);
+buildTicks('ticksInv', 20, 4, 50);
+buildTicks('ticksGrid', 20, 4, 50);
+
+buildTicks('ticksPvV', 15, 3, 30);
+buildTicks('ticksCloud', 10, 2, 30);
+buildTicks('ticksAmps', 20, 4, 30);
+buildTicks('ticksTemp', 10, 2, 30);
+
+// Move a needle
+function setNeedle(needleId, val, max) {
   const needle = document.getElementById(needleId);
-  const text = document.getElementById(textId);
-  if (!needle || !text) return;
-  
+  if (!needle) return;
   const frac = Math.max(0, Math.min(1, val / max));
   const angle = -135 + (270 * frac);
   needle.style.transform = `rotate(${angle}deg)`;
-  
-  if (text) text.textContent = val.toFixed(0) + unit;
 }
 
 /* ---------- WEATHER ---------- */
@@ -452,18 +512,8 @@ async function fetchWeather() {
     if (currentIndex === -1) currentIndex = 8;
     const nextIndex = currentIndex + 1;
 
-    const deg = w.current.wind_direction_10m;
-    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    const windDirText = dirs[Math.round(deg / 45) % 8];
-
     document.getElementById('wTemp').textContent = w.current.temperature_2m + '°C';
-    document.getElementById('wFeels').textContent = w.current.apparent_temperature + '°C';
-    document.getElementById('wWind').textContent = w.current.wind_speed_10m + ' km/h';
-    document.getElementById('wWindDir').textContent = windDirText + ' (' + deg + '°)';
-    document.getElementById('wRain').textContent = w.current.precipitation_probability + '%';
     document.getElementById('wIrrNow').textContent = w.current.shortwave_radiation;
-    document.getElementById('wIrrNext').textContent = w.hourly.shortwave_radiation[nextIndex];
-    document.getElementById('wCloudNext').textContent = w.hourly.cloud_cover[nextIndex];
     document.getElementById('wSun').textContent = w.daily.sunrise[0].split('T')[1] + ' / ' + w.daily.sunset[0].split('T')[1];
   } catch (e) {
     console.error('Weather fetch failed:', e);
@@ -475,15 +525,6 @@ function num(v){
   if(v===null||v===undefined||v===''||String(v).toLowerCase()==='nan') return null; 
   const n=Number(v); 
   return Number.isFinite(n)?n:null; 
-}
-
-function setDeviceStatus(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const strVal = String(val).toUpperCase();
-  if (strVal === 'YES' || strVal === '1') { el.textContent = 'ONLINE'; el.classList.add('on'); el.classList.remove('off'); }
-  else if (strVal === 'NO' || strVal === '0') { el.textContent = 'OFFLINE'; el.classList.remove('on'); el.classList.add('off'); }
-  else { el.textContent = '—'; el.classList.remove('on', 'off'); }
 }
 
 function drawCombinedChart() {
@@ -503,7 +544,7 @@ function drawCombinedChart() {
   
   const pad = 4, plotH = h - 8, plotW = w - 8;
   
-  ctx.strokeStyle = 'rgba(126,177,216,.14)';
+  ctx.strokeStyle = 'rgba(107,255,184,0.1)';
   ctx.lineWidth = 1;
 
   for (let i = 0; i <= 4; i++) {
@@ -560,8 +601,8 @@ function drawCombinedChart() {
 
   if (!hasData) {
     ctx.fillStyle = '#6d91b1';
-    ctx.font = '9px system-ui';
-    ctx.fillText('Waiting…', 8, h / 2 + 3);
+    ctx.font = '9px monospace';
+    ctx.fillText('WAITING FOR DATA...', 8, h / 2 + 3);
   }
 }
 
@@ -612,64 +653,57 @@ async function fetchData() {
     const battSoc = num(data.battery_soc);
     const pvVolt = num(data.pv_voltage);
 
-    // Main Gauges
-    document.getElementById('pvpower').textContent = pvPower !== null ? Math.round(pvPower) : '—';
-    document.getElementById('invpower').textContent = invPower !== null ? Math.round(invPower) : '—';
-    document.getElementById('totalgrid').textContent = totalGrid !== null ? Math.round(totalGrid) : '—';
-    document.getElementById('battery').textContent = battVolt !== null ? battVolt.toFixed(2) : '—';
+    // Main Digital Values
+    document.getElementById('pvPower').textContent = pvPower !== null ? Math.round(pvPower) : '0';
+    document.getElementById('invPower').textContent = invPower !== null ? Math.round(invPower) : '0';
+    document.getElementById('gridPower').textContent = totalGrid !== null ? Math.round(totalGrid) : '0';
+    document.getElementById('battVolt').textContent = battVolt !== null ? battVolt.toFixed(1) : '0.0';
 
-    // Main Arcs
-    setArc('pvArc', pvPower / 2000);
-    setArc('invArc', invPower / 2000);
-    setArc('gridArc', totalGrid / 2000);
-    setArc('battArc', battVolt / 60);
-
-    // Mini Analog Needles (Replaced Vertical Bars)
-    const diff = (pvPower||0) - ((invPower||0) + ((invPower||0) > 0 ? 100 : 0));
+    // Mini Digital Values
+    document.getElementById('pvVolt').textContent = pvVolt !== null ? Math.round(pvVolt) : '0';
+    document.getElementById('cloudCover').textContent = cloud !== null ? Math.round(cloud) : '0';
+    document.getElementById('dhtTemp').textContent = dhtTemp !== null ? Math.round(dhtTemp) : '0';
+    
+    const totalLoad = (invPower||0) + ((invPower||0) > 0 ? 100 : 0);
+    const diff = (pvPower||0) - totalLoad;
     const amps = Math.abs(diff) > 10 ? diff / (battVolt || 48) : 0;
+    document.getElementById('battAmps').textContent = (amps > 0 ? '+' : '') + amps.toFixed(1);
 
-    setNeedle('needleSoc', 'valSoc', battSoc || 0, 100, '%');
-    setNeedle('needlePvV', 'valPvV', pvVolt || 0, 150, 'V');
-    setNeedle('needleGridV', 'valGridV', gridVolt || 0, 300, 'V');
-    setNeedle('needleAmps', 'valAmps', Math.abs(amps), 50, 'A');
-    setNeedle('needleCloud', 'valCloud', cloud || 0, 100, '%');
-    setNeedle('needleTemp', 'valTemp', dhtTemp || 0, 50, '°C');
+    // Main Needles
+    setNeedle('needlePv', pvPower || 0, 2000);
+    setNeedle('needleBatt', battVolt || 0, 60);
+    setNeedle('needleInv', invPower || 0, 2000);
+    setNeedle('needleGrid', totalGrid || 0, 2000);
 
-    // Horizontal Bars
+    // Mini Needles
+    setNeedle('needlePvV', pvVolt || 0, 150);
+    setNeedle('needleCloud', cloud || 0, 100);
+    setNeedle('needleAmps', Math.abs(amps), 50);
+    setNeedle('needleTemp', dhtTemp || 0, 50);
+
+    // Switches & LEDs
+    const swCharge = document.getElementById('swCharge');
+    if (amps > 0) swCharge.className = 'toggle-handle on'; else swCharge.className = 'toggle-handle';
+
+    const swGrid = document.getElementById('swGrid');
+    const ledGrid = document.getElementById('ledGridStatus');
+    if (Number(data.grid_voltage) > 0) {
+      swGrid.className = 'toggle-handle on';
+      ledGrid.className = 'led green';
+    } else {
+      swGrid.className = 'toggle-handle';
+      ledGrid.className = 'led red';
+    }
+
+    // Floors & Energy
     const floor1 = Math.max(0, (totalGrid||0) - (floorGrid||0));
     document.getElementById('floor1').textContent = Math.round(floor1) + ' W';
-    document.getElementById('floorgrid').textContent = Math.round(floorGrid || 0) + ' W';
-    document.getElementById('floor1Bar').style.width = Math.min(100, (floor1 / 2000) * 100) + '%';
-    document.getElementById('floor2Bar').style.width = Math.min(100, (floorGrid / 2000) * 100) + '%';
+    document.getElementById('floorGrid').textContent = Math.round(floorGrid || 0) + ' W';
 
-    // Toggle Switches (Energy)
     const todayPv = num(data.today_pv_kwh) || 0;
     const todayInv = num(data.today_inverter_kwh) || 0;
-    const todayGrid = num(data.today_grid_kwh) || 0;
-    document.getElementById('switchPvLabel').textContent = todayPv.toFixed(1) + ' kWh';
-    document.getElementById('switchInvLabel').textContent = todayInv.toFixed(1) + ' kWh';
-    document.getElementById('switchGridLabel').textContent = todayGrid.toFixed(1) + ' kWh';
-
-    // LEDs
-    setDeviceStatus('led129', data.esp129_online);
-    setDeviceStatus('led124', data.esp124_online);
-    setDeviceStatus('led100', data.meter100_online);
-    
-    const isAcInverter = (invPower !== null && invPower > 1200);
-    const isAcGrid = (floorGrid !== null && floorGrid > 1000);
-    const ledAc = document.getElementById('ledAc');
-    const ledAcSrc = document.getElementById('ledAcSrc');
-    if (isAcInverter || isAcGrid) { ledAc.className = 'led on'; ledAc.textContent = 'AC ON'; } 
-    else { ledAc.className = 'led off'; ledAc.textContent = 'AC OFF'; }
-    
-    if (isAcInverter) { ledAcSrc.className = 'led on'; ledAcSrc.textContent = 'SOLAR'; }
-    else if (isAcGrid) { ledAcSrc.className = 'led off'; ledAcSrc.textContent = 'GRID'; }
-    else { ledAcSrc.className = 'led'; ledAcSrc.textContent = '—'; }
-
-    const ledMppt = document.getElementById('ledMppt');
-    if (pvVolt === 0) { ledMppt.className = 'led off'; ledMppt.textContent = 'MPPT OFF'; }
-    else if (pvVolt < 120) { ledMppt.className = 'led on'; ledMppt.textContent = 'MPPT OK'; }
-    else { ledMppt.className = 'led off'; ledMppt.textContent = 'MPPT ERR'; }
+    document.getElementById('todayPv').textContent = todayPv.toFixed(1) + ' kWh';
+    document.getElementById('todayInv').textContent = todayInv.toFixed(1) + ' kWh';
 
     // Chart
     if (pvPower !== null) recordSample('pv', pvPower);
@@ -681,6 +715,7 @@ async function fetchData() {
   }
 }
 
+// Initialize
 fetchHistory();
 fetchData();
 fetchWeather();
