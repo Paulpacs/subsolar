@@ -119,14 +119,32 @@
     overflow: hidden;
   }
   
-  /* Ticks */
+  /* SCALES & TICKS */
   .gauge-ticks { position: absolute; inset: 0; border-radius: 50%; z-index: 2;}
+  
   .tick {
-    position: absolute; top: 0; left: 50%; width: 1px; height: 5px;
-    background: var(--white); transform-origin: 50% 50px;
-    opacity: 0.6;
+    position: absolute; top: 0; left: 50%; width: 1px; height: 4px;
+    background: var(--white); 
+    transform-origin: 50% 50%; /* Will be overridden by JS */
+    opacity: 0.5;
   }
-  .tick.major { height: 8px; width: 2px; background: var(--warning-yellow); opacity: 1; }
+  
+  .tick.major { 
+    height: 8px; width: 2px; 
+    background: var(--white); 
+    opacity: 1; 
+    margin-left: -0.5px;
+  }
+
+  .tick-label {
+    position: absolute; top: 0; left: 50%;
+    color: var(--white); font-size: 7px; font-weight: bold;
+    font-family: Arial, sans-serif;
+    transform-origin: 50% 50%;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 2;
+  }
 
   /* Needle */
   .needle {
@@ -144,18 +162,16 @@
     border-radius: 50%; z-index: 4; border: 1px solid #000;
   }
 
-  /* =========================================
-     DIGITAL READOUT (INCREASED 100% & BOLD)
-     ========================================= */
+  /* DIGITAL READOUT */
   .gauge-digital {
     position: absolute; bottom: 12%; width: 100%; text-align: center;
-    z-index: 2; background: rgba(0,0,0,0.8); padding: 2px 0;
+    z-index: 2; background: rgba(0,0,0,0.85); padding: 2px 0;
     border-top: 1px solid #333; border-bottom: 1px solid #333;
   }
   .gauge-digital .num { 
     font-family: 'Courier New', monospace; 
-    font-size: 28px; /* Increased from 14px */
-    font-weight: 900; /* Extra bold */
+    font-size: 28px; 
+    font-weight: 900; 
     color: var(--lime); 
     text-shadow: 0 0 8px rgba(122,204,80,0.8); 
     line-height: 1.1;
@@ -186,13 +202,14 @@
   }
   .mini-gauge .needle { height: 18px; }
   
-  /* Increase mini gauge numbers 100% */
-  .mini-gauge .gauge-digital { bottom: 8%; padding: 1px 0; }
-  .mini-gauge .gauge-digital .num { 
-    font-size: 18px; /* Increased from 9px */
-    font-weight: 900; 
-  }
+  .mini-gauge .gauge-digital { bottom: 6%; padding: 1px 0; }
+  .mini-gauge .gauge-digital .num { font-size: 18px; font-weight: 900; }
   .mini-gauge .gauge-digital .lbl { font-size: 5px; font-weight: bold; }
+
+  /* Smaller labels for mini gauges */
+  .mini-gauge .tick-label { font-size: 5px; }
+  .mini-gauge .tick { height: 3px; }
+  .mini-gauge .tick.major { height: 5px; }
 
   /* =========================================
      HORIZON GAUGE (ATTITUDE INDICATOR)
@@ -211,7 +228,6 @@
     overflow: hidden;
   }
   
-  /* The moving ball inside the gauge */
   .horizon-ball {
     position: absolute; width: 200%; height: 200%;
     top: -50%; left: -50%;
@@ -222,14 +238,12 @@
     z-index: 1;
   }
   
-  /* The horizon line (black separator) */
   .horizon-line {
     position: absolute; width: 100%; height: 2px; background: #000;
     top: 50%; transform: translateY(-50%); z-index: 2;
     box-shadow: 0 0 4px rgba(0,0,0,0.8);
   }
 
-  /* Fixed aircraft reticle overlay (for style) */
   .horizon-reticle {
     position: absolute; inset: 0; z-index: 3; pointer-events: none;
   }
@@ -240,39 +254,12 @@
     content: ''; position: absolute; top: 50%; right: 10%; width: 30%; height: 2px; background: var(--white); transform: translateY(-50%); box-shadow: 0 0 4px #000; opacity: 0.7;
   }
 
-  /* Dark glass overlay to mute the colors */
   .horizon-glass {
     position: absolute; inset: 0; z-index: 4; pointer-events: none;
     background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%);
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
     border-radius: 50%;
   }
-
-  /* TOGGLE SWITCHES */
-  .switch-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-  .switch-box {
-    display: flex; align-items: center; gap: 4px;
-    background: #000; padding: 2px 4px; border-radius: 3px; border: 1px solid #333;
-  }
-  .switch-box .lbl { font-size: 6px; color: var(--text-dim); text-transform: uppercase; }
-  
-  .toggle-handle {
-    width: 12px; height: 18px; background: linear-gradient(180deg, #555 0%, #222 100%);
-    border-radius: 2px; border: 1px solid #000; position: relative;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
-  }
-  .toggle-handle::after {
-    content: ''; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
-    width: 8px; height: 8px; border-radius: 50%; background: #888;
-  }
-  .toggle-handle.on { transform: scaleY(-1); }
-
-  .led {
-    width: 8px; height: 8px; border-radius: 50%; background: #333;
-    border: 1px solid #000; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
-  }
-  .led.green { background: var(--lime); box-shadow: 0 0 6px rgba(122,204,80,0.6); }
-  .led.red { background: var(--red); box-shadow: 0 0 6px rgba(204,68,68,0.6); }
 
   /* LED DOT MATRIX SCREEN */
   .led-screen-panel {
@@ -464,7 +451,7 @@
     
     <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
       
-      <!-- HORIZON GAUGE (1st Floor Bottom, 2nd Floor Top) -->
+      <!-- HORIZON GAUGE -->
       <div class="horizon-gauge" style="width: 90px; height: 90px;">
         <div class="horizon-face">
           <div class="horizon-ball" id="horizonBall"></div>
@@ -549,31 +536,58 @@ const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=9.31242
 const history = { pv: [], inv: [], grid: [] };
 const MAX_POINTS = 21;
 
-/* ---------- GAUGE GENERATOR ---------- */
-function buildTicks(containerId, count, majorEvery, radius = 50) {
+/* ---------- GRADUATED SCALE GENERATOR ---------- */
+function buildScale(containerId, majorCount, maxVal, radius, isMini = false) {
   const container = document.getElementById(containerId);
   if(!container) return;
   container.innerHTML = ''; 
-  for (let i = 0; i <= count; i++) {
+  
+  const totalTicks = majorCount * 4; // 4 minor ticks per major tick
+  
+  for (let i = 0; i <= totalTicks; i++) {
+    const isMajor = i % 4 === 0;
     const tick = document.createElement('div');
-    tick.className = 'tick' + (i % majorEvery === 0 ? ' major' : '');
-    const angle = -135 + (270 * (i / count));
+    tick.className = 'tick' + (isMajor ? ' major' : '');
+    
+    // Calculate angle (-135 to 135)
+    const angle = -135 + (270 * (i / totalTicks));
+    
+    // Position tick
     tick.style.transform = `rotate(${angle}deg) translateY(-${radius}px)`;
     container.appendChild(tick);
+
+    // Add labels on major ticks
+    if (isMajor) {
+      const labelVal = (maxVal / majorCount) * (i / 4);
+      if (labelVal !== 0 && labelVal !== maxVal) { // Skip 0 and max to save space
+        const lbl = document.createElement('div');
+        lbl.className = 'tick-label';
+        lbl.textContent = Math.round(labelVal);
+        
+        // Push label slightly further out than the tick
+        const labelRadius = radius + (isMini ? 5 : 8);
+        
+        // We need to position the label, then counter-rotate it so the text stays upright
+        lbl.style.transform = `rotate(${angle}deg) translateY(-${labelRadius}px) rotate(${-angle}deg)`;
+        container.appendChild(lbl);
+      }
+    }
   }
 }
 
-// Generate standard ticks
-buildTicks('ticksPv', 20, 4, 50);
-buildTicks('ticksBatt', 20, 4, 50);
-buildTicks('ticksInv', 20, 4, 50);
-buildTicks('ticksGrid', 20, 4, 50);
-buildTicks('ticksPvV', 15, 3, 30);
-buildTicks('ticksCloud', 10, 2, 30);
-buildTicks('ticksAmps', 20, 4, 30);
-buildTicks('ticksTemp', 10, 2, 30);
-buildTicks('ticksSoc', 10, 2, 30);
-buildTicks('ticksHum', 10, 2, 30);
+// Build Graduated Scales
+// Parameters: (ID, Number of major sections, Max Value, Radius in px, isMini)
+buildScale('ticksPv', 4, 2000, 50);
+buildScale('ticksBatt', 4, 60, 50);
+buildScale('ticksInv', 4, 2000, 50);
+buildScale('ticksGrid', 4, 2000, 50);
+
+buildScale('ticksPvV', 3, 150, 30, true);
+buildScale('ticksCloud', 4, 100, 30, true);
+buildScale('ticksAmps', 4, 50, 30, true);
+buildScale('ticksTemp', 4, 50, 30, true);
+buildScale('ticksSoc', 4, 100, 30, true);
+buildScale('ticksHum', 4, 100, 30, true);
 
 function setNeedle(needleId, val, max) {
   const needle = document.getElementById(needleId);
